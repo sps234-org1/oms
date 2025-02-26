@@ -12,7 +12,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
 
-
     public UserDetails createUser(UserDetails userDetails) {
         return userDao.save(userDetails);
     }

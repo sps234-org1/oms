@@ -58,38 +58,36 @@ public class UserRoleDetails {
         return Objects.hash(user, role);
     }
 
-
-
 }
 
 
 class UserRoleId implements Serializable {
 
-    private Integer userId;
+    private Integer user;
 
-    private Integer roleId;
+    private Integer role;
 
     public UserRoleId() {    }
 
-    public UserRoleId(Integer userId, Integer roleId) {
-        this.userId = userId;
-        this.roleId = roleId;
+    public UserRoleId(Integer user, Integer role) {
+        this.user = user;
+        this.role = role;
     }
 
     public Integer getUserId() {
-        return userId;
+        return user;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUserId(Integer user) {
+        this.user = user;
     }
 
     public Integer getRoleId() {
-        return roleId;
+        return role;
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    public void setRoleId(Integer role) {
+        this.role = role;
     }
 
     @Override
@@ -97,12 +95,12 @@ class UserRoleId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserRoleId that = (UserRoleId) o;
-        return Objects.equals(userId, that.userId) &&
-                Objects.equals(roleId, that.roleId);
+        return Objects.equals(user, that.user) &&
+                Objects.equals(role, that.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, roleId);
+        return Objects.hash(user, role);
     }
 }

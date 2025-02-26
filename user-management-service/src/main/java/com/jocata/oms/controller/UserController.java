@@ -13,22 +13,22 @@ public class UserController {
     private UserService userService;
 
     @PostMapping( "/create" )
-    UserDetails createUser(UserDetails userDetails) {
+    UserDetails createUser(@RequestBody UserDetails userDetails) {
         return userService.createUser(userDetails);
     }
 
-    @GetMapping( "/get/{userId}" )
-    UserDetails getUser(Integer userId) {
+    @GetMapping( "/get" )
+    UserDetails getUser(@RequestParam Integer userId) {
         return userService.getUser(userId);
     }
 
     @PutMapping( "/update" )
-    UserDetails updateUser(UserDetails userDetails) {
+    UserDetails updateUser(@RequestBody UserDetails userDetails) {
         return userService.updateUser(userDetails);
     }
 
-    @DeleteMapping( "/delete/{userId}" )
-    UserDetails deleteUser(Integer userId){
+    @DeleteMapping( "/delete" )
+    UserDetails deleteUser(@RequestParam Integer userId){
         return userService.deleteUser(userId);
     }
 
