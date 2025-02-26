@@ -1,8 +1,6 @@
-//package com.jocata.oms.dao.impl;
-//
-//import com.jocata.oms.dao.UserDao;
-//
-//public class UserDaoImpl  {
-//
-//
-//}
+package com.jocata.oms.dao.impl;
+
+public class UserDaoImpl  {
+
+
+}
