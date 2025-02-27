@@ -1,16 +1,13 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.bean;
 
-import jakarta.persistence.*;
+import com.jocata.oms.entity.AddressDetails;
+import com.jocata.oms.entity.UserRoleDetails;
 
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "users")
-public class UserDetails {
+public class UserBean {
 
-    @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer userId;
 
     private String fullName;
@@ -29,23 +26,15 @@ public class UserDetails {
 
     private boolean isActive;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date deletedAt;
 
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<AddressDetails> addresses;
 
-    @OneToMany( mappedBy="user", cascade = CascadeType.ALL )
     private List<UserRoleDetails> roles;
-
-    public UserDetails() {    }
 
     public Integer getUserId() {
         return userId;

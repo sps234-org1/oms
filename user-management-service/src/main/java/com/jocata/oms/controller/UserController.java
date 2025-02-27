@@ -1,6 +1,8 @@
 package com.jocata.oms.controller;
 
+import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.entity.UserDetails;
+import com.jocata.oms.request.GenericRequestPayload;
 import com.jocata.oms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +15,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping( "/create" )
-    UserDetails createUser(@RequestBody UserDetails userDetails) {
-        return userService.createUser(userDetails);
+    UserDetails createUser(@RequestBody GenericRequestPayload genericRequestPayload ) {
+        return userService.createUser( (UserBean) genericRequestPayload.getData() );
     }
 
     @GetMapping( "/get" )

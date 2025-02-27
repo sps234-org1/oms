@@ -22,6 +22,7 @@
         <module>data-model</module>
         <module>data</module>
         <module>user-management-service</module>
+        <module>common</module>
     </modules>
 
     <properties>
@@ -46,6 +47,18 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-devtools</artifactId>
                 <version>3.4.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+                <version>4.2.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-gateway</artifactId>
+                <version>4.2.0</version>
             </dependency>
 
         </dependencies>

@@ -1,5 +1,6 @@
 package com.jocata.oms.service.impl;
 
+import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.dao.UserDao;
 import com.jocata.oms.entity.UserDetails;
 import com.jocata.oms.service.UserService;
@@ -12,8 +13,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
 
-    public UserDetails createUser(UserDetails userDetails) {
-        return userDao.save(userDetails);
+    public UserDetails createUser(UserBean userBean) {
+
+        UserDetails userDetails = new UserDetails();
+        userDetails.setFullName(userBean.getFullName());
+        userDetails.setEmail(userBean.getEmail());
+        userDetails.setPasswordHash(userBean.getPasswordHash());
+        userDetails.setActive(userBean.isActive());
+
+
+        return userDao.save( userDetails );
     }
 
     public UserDetails getUser( Integer userId) {
