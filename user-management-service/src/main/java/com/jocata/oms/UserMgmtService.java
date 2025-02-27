@@ -10,10 +10,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = "com.jocata.oms")
 @EnableJpaRepositories(basePackages = "com.jocata.oms.dao")
 @EntityScan(basePackages = "com.jocata.oms.entity")
-public class Main {
+public class UserMgmtService {
     public static void main(String[] args) {
 
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(UserMgmtService.class, args);
 
         System.out.println("Hello, World!");
     }
