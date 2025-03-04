@@ -5,8 +5,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.web.server.ServerWebExchange;
@@ -56,14 +58,19 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable) // Disable CSRF for APIs
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/user-mgmt-service/api/v1/admin/").hasRole("ADMIN")
-                        .pathMatchers("/user-mgmt-service/api/v1/user/").hasAnyRole("USER", "ADMIN" )
-                        .pathMatchers(HttpMethod.GET, "/api/public/").permitAll()
+                        .pathMatchers("/user-mgmt-service/api/v1/admin/**").hasRole("ADMIN")
+                        .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyRole("USER", "ADMIN" )
+                        .pathMatchers(HttpMethod.GET, "/user-mgmt-service/api/v1/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
         return http.build();
+    }
+
+    @Bean
+    public UserDetailsRepositoryReactiveAuthenticationManager authenticationManager(ReactiveUserDetailsService userDetailsService) {
+        return new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
     }
 
 }

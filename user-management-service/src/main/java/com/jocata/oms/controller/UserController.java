@@ -2,7 +2,6 @@ package com.jocata.oms.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocata.oms.bean.UserBean;
-import com.jocata.oms.entity.UserDetails;
 import com.jocata.oms.request.GenericRequestPayload;
 import com.jocata.oms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,14 @@ public class UserController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping("/create")
+    @PostMapping("/user/create")
     UserBean createUser(@RequestBody GenericRequestPayload genericRequestPayload) {
+        UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
+        return userService.createUser( userBean );
+    }
+
+    @PostMapping("/admin/create")
+    UserBean createAdmin(@RequestBody GenericRequestPayload genericRequestPayload) {
         UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
         return userService.createUser( userBean );
     }
@@ -31,17 +36,17 @@ public class UserController {
         return userService.getUser(userId);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/user/update")
     UserBean updateUser(@RequestBody UserBean userBean) {
         return userService.updateUser( userBean);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/user/delete")
     UserBean deleteUser(@RequestParam Integer userId, @RequestParam boolean hardDelete ) {
         return userService.deleteUser(userId, hardDelete );
     }
 
-    @GetMapping("/getByEmail")
+    @GetMapping("/user/getByEmail")
     UserBean getUserByEmail(@RequestParam String email) {
         return userService.getUserByEmail( email );
     }
