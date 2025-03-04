@@ -1,29 +1,14 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.bean;
 
+import com.jocata.oms.entity.RolePermissionDetails;
 
-import jakarta.persistence.*;
-
-import javax.management.relation.Role;
 import java.util.List;
 
-@Entity
-@Table( name = "permissions")
-public class PermissionDetails {
+public class PermissionBean {
 
-    @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer permissionId;
 
     private String permissionName;
-
-    @ManyToMany(mappedBy = "permissions")
-    private List<RoleDetails> roles;
-
-    public PermissionDetails() {    }
-
-    public PermissionDetails(String permissionName) {
-        this.permissionName = permissionName;
-    }
 
     public Integer getPermissionId() {
         return permissionId;

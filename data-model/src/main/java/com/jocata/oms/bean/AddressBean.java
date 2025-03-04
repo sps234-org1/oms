@@ -1,36 +1,21 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.bean;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import com.jocata.oms.entity.UserDetails;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "addresses")
-public class AddressDetails {
+public class AddressBean {
 
-    @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer addressId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false )
-    @JsonBackReference( value = "user-address" )
-    private UserDetails user;
-
     private String address;
     private String city;
     private String state;
     private String country;
     private String zipCode;
-
-
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
-
 
     public Integer getAddressId() {
         return addressId;
@@ -38,14 +23,6 @@ public class AddressDetails {
 
     public void setAddressId(Integer addressId) {
         this.addressId = addressId;
-    }
-
-    public UserDetails getUser() {
-        return user;
-    }
-
-    public void setUser(UserDetails user) {
-        this.user = user;
     }
 
     public String getAddress() {
@@ -103,4 +80,5 @@ public class AddressDetails {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 }

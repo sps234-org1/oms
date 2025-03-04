@@ -2,6 +2,7 @@ package com.jocata.oms.entity;
 
 
 import jakarta.persistence.*;
+
 import java.util.List;
 
 @Entity
@@ -9,16 +10,22 @@ import java.util.List;
 public class RoleDetails {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer roleId;
 
     private String roleName;
 
-    @OneToMany( mappedBy = "role", cascade = CascadeType.ALL )
-    private List<UserRoleDetails> users;
 
-    @OneToMany( mappedBy = "role", cascade = CascadeType.ALL )
-    private List<RolePermissionDetails> permissions;
+    @ManyToMany(mappedBy = "roles")
+    private List<UserDetails> users;
+
+    @ManyToMany
+    @JoinTable(
+            name = "role_permission",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    private List<PermissionDetails> permissions;
 
     public Integer getRoleId() {
         return roleId;
@@ -36,19 +43,19 @@ public class RoleDetails {
         this.roleName = roleName;
     }
 
-    public List<UserRoleDetails> getUsers() {
+    public List<UserDetails> getUsers()  {
         return users;
     }
 
-    public void setUsers(List<UserRoleDetails> users) {
+    public void setUsers(List<UserDetails> users) {
         this.users = users;
     }
 
-    public List<RolePermissionDetails> getPermissions() {
+    public List<PermissionDetails> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<RolePermissionDetails> permissions) {
+    public void setPermissions(List<PermissionDetails> permissions) {
         this.permissions = permissions;
     }
 }

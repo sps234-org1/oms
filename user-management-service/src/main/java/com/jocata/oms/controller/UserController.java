@@ -8,8 +8,10 @@ import com.jocata.oms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1")
 public class UserController {
 
     @Autowired
@@ -19,24 +21,34 @@ public class UserController {
     private ObjectMapper objectMapper;
 
     @PostMapping("/create")
-    UserDetails createUser(@RequestBody GenericRequestPayload genericRequestPayload) {
+    UserBean createUser(@RequestBody GenericRequestPayload genericRequestPayload) {
         UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
         return userService.createUser( userBean );
     }
 
-    @GetMapping("/get")
-    UserDetails getUser(@RequestParam Integer userId) {
+    @GetMapping("/user/get")
+    UserBean getUser(@RequestParam Integer userId) {
         return userService.getUser(userId);
     }
 
     @PutMapping("/update")
-    UserDetails updateUser(@RequestBody UserDetails userDetails) {
-        return userService.updateUser(userDetails);
+    UserBean updateUser(@RequestBody UserBean userBean) {
+        return userService.updateUser( userBean);
     }
 
     @DeleteMapping("/delete")
-    UserDetails deleteUser(@RequestParam Integer userId) {
-        return userService.deleteUser(userId);
+    UserBean deleteUser(@RequestParam Integer userId, @RequestParam boolean hardDelete ) {
+        return userService.deleteUser(userId, hardDelete );
+    }
+
+    @GetMapping("/getByEmail")
+    UserBean getUserByEmail(@RequestParam String email) {
+        return userService.getUserByEmail( email );
+    }
+
+    @GetMapping("/admin/getAll")
+    List<UserBean> getAllUsers() {
+        return userService.getAllUsers();
     }
 
 }

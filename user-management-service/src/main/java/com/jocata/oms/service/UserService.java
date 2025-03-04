@@ -1,15 +1,20 @@
 package com.jocata.oms.service;
 
 import com.jocata.oms.bean.UserBean;
-import com.jocata.oms.entity.UserDetails;
+
+import java.util.List;
 
 public interface UserService {
 
-    UserDetails createUser( UserBean userBean );
+    UserBean createUser( UserBean userBean );
 
-    UserDetails getUser(Integer userId);
+    UserBean getUser(Integer userId);
 
-    UserDetails updateUser(UserDetails userDetails);
+    UserBean updateUser(UserBean userBean);
 
-    UserDetails deleteUser(Integer userId);
+    UserBean deleteUser(Integer userId,  boolean hardDelete );
+
+    UserBean getUserByEmail( String email );
+
+    List<UserBean> getAllUsers();
 }

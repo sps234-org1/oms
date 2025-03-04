@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-@Table( name = "user_roles" )
+@Table( name = "user_role" )
 @IdClass( UserRoleId.class )
 public class UserRoleDetails {
 

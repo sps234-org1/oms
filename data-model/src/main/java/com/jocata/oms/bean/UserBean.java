@@ -1,8 +1,5 @@
 package com.jocata.oms.bean;
 
-import com.jocata.oms.entity.AddressDetails;
-import com.jocata.oms.entity.UserRoleDetails;
-
 import java.util.Date;
 import java.util.List;
 
@@ -32,9 +29,10 @@ public class UserBean {
 
     private Date deletedAt;
 
-    private List<AddressDetails> addresses;
+    private List<AddressBean> addresses;
 
-    private List<UserRoleDetails> roles;
+    private List<RoleBean> roles;
+
 
     public Integer getUserId() {
         return userId;
@@ -132,19 +130,19 @@ public class UserBean {
         this.deletedAt = deletedAt;
     }
 
-    public List<AddressDetails> getAddresses() {
+    public List<AddressBean> getAddresses() {
         return addresses;
     }
 
-    public void setAddresses(List<AddressDetails> addresses) {
+    public void setAddresses(List<AddressBean> addresses) {
         this.addresses = addresses;
     }
 
-    public List<UserRoleDetails> getRoles() {
+    public List<RoleBean> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<UserRoleDetails> roles) {
+    public void setRoles(List<RoleBean> roles) {
         this.roles = roles;
     }
 }

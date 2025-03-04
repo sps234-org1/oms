@@ -1,17 +1,10 @@
-package com.jocata.oms.entity;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+package com.jocata.oms.response;
 
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "users")
-public class UserDetails {
+public class UserBean {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
 
     private String fullName;
@@ -30,29 +23,16 @@ public class UserDetails {
 
     private boolean isActive;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date deletedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonBackReference(value = "user-address")
-    private List<AddressDetails> addresses;
+    private List<AddressBean> addresses;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<RoleDetails> roles;
+    private List<RoleBean> roles;
 
-    public UserDetails() {
-    }
 
     public Integer getUserId() {
         return userId;
@@ -150,19 +130,19 @@ public class UserDetails {
         this.deletedAt = deletedAt;
     }
 
-    public List<AddressDetails> getAddresses() {
+    public List<AddressBean> getAddresses() {
         return addresses;
     }
 
-    public void setAddresses(List<AddressDetails> addresses) {
+    public void setAddresses(List<AddressBean> addresses) {
         this.addresses = addresses;
     }
 
-    public List<RoleDetails> getRoles() {
+    public List<RoleBean> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<RoleDetails> roles) {
+    public void setRoles(List<RoleBean> roles) {
         this.roles = roles;
     }
 }
