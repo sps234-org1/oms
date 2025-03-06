@@ -38,7 +38,7 @@ public class CustomUserDetailsService implements ReactiveUserDetailsService {
             return getUserByEmail(url)
                     .map(user -> User.builder()
                             .username(user.getEmail())
-                            .password("{noop}" + user.getPasswordHash())  // Add {noop} if password is plaintext
+                            .password("{noop}" + user.getPasswordHash())
                             .roles(user.getRoles().get(0).getRoleName())
                             .build())
                     .switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found with email: " + email)));

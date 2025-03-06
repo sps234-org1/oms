@@ -6,6 +6,7 @@ import com.jocata.oms.request.GenericRequestPayload;
 import com.jocata.oms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,12 +22,6 @@ public class UserController {
 
     @PostMapping("/user/create")
     UserBean createUser(@RequestBody GenericRequestPayload genericRequestPayload) {
-        UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
-        return userService.createUser( userBean );
-    }
-
-    @PostMapping("/admin/create")
-    UserBean createAdmin(@RequestBody GenericRequestPayload genericRequestPayload) {
         UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
         return userService.createUser( userBean );
     }
@@ -55,5 +50,19 @@ public class UserController {
     List<UserBean> getAllUsers() {
         return userService.getAllUsers();
     }
+
+
+    @PostMapping( "/admin/add/users/xls/upload" )
+    List<UserBean> addUsersUsingExcel( @RequestParam("file") MultipartFile file ) {
+        return userService.addUsersUsingExcel(file);
+    }
+
+
+    @PostMapping( "/admin/add/users/pdf/upload" )
+    String addUsersUsingPdf( @RequestParam("file") MultipartFile file ) {
+        return "";
+    }
+
+
 
 }

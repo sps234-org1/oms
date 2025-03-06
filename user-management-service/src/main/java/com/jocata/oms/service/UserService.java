@@ -1,6 +1,7 @@
 package com.jocata.oms.service;
 
 import com.jocata.oms.bean.UserBean;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,4 +18,7 @@ public interface UserService {
     UserBean getUserByEmail( String email );
 
     List<UserBean> getAllUsers();
+
+    List<UserBean> addUsersUsingExcel(MultipartFile file);
+
 }

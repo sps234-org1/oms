@@ -4,8 +4,6 @@ import com.jocata.oms.entity.RoleDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import javax.management.relation.Role;
-
 public interface RoleDao extends JpaRepository<RoleDetails, Integer> {
 
     @Query( "SELECT r FROM RoleDetails r WHERE r.roleName = ?1")

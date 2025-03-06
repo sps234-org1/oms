@@ -12,12 +12,18 @@ import com.jocata.oms.entity.PermissionDetails;
 import com.jocata.oms.entity.RoleDetails;
 import com.jocata.oms.entity.UserDetails;
 import com.jocata.oms.service.UserService;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.InputStream;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -107,11 +113,17 @@ public class UserServiceImpl implements UserService {
             List<PermissionDetails> pd = permissionDao.findAll();
             userRole.setPermissions(pd);
         } else {
+
             List<PermissionDetails> permissionDetailsList = new ArrayList<>();
-            for (PermissionBean permissionBean : roleBean.getPermissions()) {
-                PermissionDetails permissionDetails = permissionDao.findByPermissionName(permissionBean.getPermissionName());
-                if (permissionDetails != null) {
-                    permissionDetailsList.add(permissionDetails);
+            if (roleBean.getPermissions() == null) {
+                System.out.println("No permissions found for role: " + roleBean.getRoleName());
+            } else {
+                for (PermissionBean permissionBean : roleBean.getPermissions()) {
+
+                    PermissionDetails permissionDetails = permissionDao.findByPermissionName(permissionBean.getPermissionName());
+                    if (permissionDetails != null) {
+                        permissionDetailsList.add(permissionDetails);
+                    }
                 }
             }
             userRole.setPermissions(permissionDetailsList);
@@ -253,4 +265,101 @@ public class UserServiceImpl implements UserService {
         return userBeanDB;
     }
 
+    public List<UserBean> addUsersUsingExcel(MultipartFile file) {
+
+        List<UserBean> userBeanList = getDataFromXLFile(file);
+        if (userBeanList == null) {
+            throw new IllegalArgumentException("No data found in the file");
+        }
+        for (UserBean userBean : userBeanList) {
+            createUser(userBean);
+        }
+
+        List<UserDetails> userDetailsDb = new ArrayList<>();
+        for (UserBean userBean : userBeanList) {
+            userDetailsDb.add(userDao.findByEmail(userBean.getEmail()));
+        }
+
+        List<UserBean> userBeanListDB = new ArrayList<>();
+        for (UserDetails userDetails : userDetailsDb) {
+            userBeanListDB.add(setDetails(userDetails));
+        }
+        return userBeanListDB;
+    }
+
+    public List<UserBean> getDataFromXLFile(MultipartFile file) {
+
+        List<UserBean> users = new ArrayList<>();
+        try (InputStream fis = file.getInputStream()) {
+            Workbook workbook;
+            if (file.getOriginalFilename().endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(fis);
+            } else if (file.getOriginalFilename().endsWith(".xls")) {
+                workbook = new HSSFWorkbook(fis);
+            } else {
+                throw new IllegalArgumentException("Invalid file format. Only .xls and .xlsx are supported.");
+            }
+            System.out.println("File Name: " + file.getOriginalFilename());
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                UserBean user = populateUserBean(row);
+                users.add(user);
+            }
+            workbook.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return users;
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                return String.valueOf((int) cell.getNumericCellValue());
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            case BLANK:
+            default:
+                return "";
+        }
+    }
+
+    UserBean populateUserBean(Row row) {
+
+        UserBean user = new UserBean();
+        user.setFullName(getCellValueAsString(row.getCell(2)));
+        user.setEmail(getCellValueAsString(row.getCell(3)));
+        user.setPasswordHash(getCellValueAsString(row.getCell(4)));
+        user.setPhone(getCellValueAsString(row.getCell(5)));
+        user.setProfilePicture(getCellValueAsString(row.getCell(6)));
+        user.setOtpSecret(getCellValueAsString(row.getCell(7)));
+        user.setSmsEnabled(Boolean.parseBoolean(getCellValueAsString(row.getCell(8))));
+        user.setIsActive(Boolean.parseBoolean(getCellValueAsString(row.getCell(9))));
+
+        AddressBean address = new AddressBean();
+        address.setAddress(getCellValueAsString(row.getCell(10)));
+        address.setCity(getCellValueAsString(row.getCell(11)));
+        address.setState(getCellValueAsString(row.getCell(12)));
+        address.setCountry(getCellValueAsString(row.getCell(13)));
+        address.setZipCode(getCellValueAsString(row.getCell(14)));
+        user.setAddresses(Collections.singletonList(address));
+
+        RoleBean role = new RoleBean();
+        role.setRoleName(getCellValueAsString(row.getCell(15)));
+        user.setRoles(Collections.singletonList(role));
+        return user;
+    }
 }
