@@ -1,76 +1,62 @@
 package com.jocata.oms.config;
 
+import com.jocata.oms.service.CustomAuthenticationConverter;
+import com.jocata.oms.service.CustomReactiveAuthenticationManager;
+import com.jocata.oms.service.CustomSecurityContextRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
+import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    /*
-    @Bean
-    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
-        http.csrf(ServerHttpSecurity.CsrfSpec::disable).
-                authorizeExchange(exchanges -> exchanges.anyExchange().authenticated()).httpBasic();
-        return http.build();
-    }
+    private final CustomAuthenticationConverter customAuthenticationConverter;
+    private final CustomReactiveAuthenticationManager customReactiveAuthenticationManager;
+    private final CustomSecurityContextRepository customSecurityContextRepository;
 
-     */
-
-
-    @Bean
-    public ServerAuthenticationEntryPoint customAuthenticationEntryPoint() {
-
-        return (exchange, ex) -> {
-            ServerWebExchange response = exchange;
-            response.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            response.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-            String body = """
-                        {
-                            "status": 401,
-                            "error": "Unauthorized",
-                            "message": "Access Denied! Please provide valid credentials."
-                        }
-                    """;
-
-            return response.getResponse().writeWith(
-                    Mono.just(response.getResponse()
-                            .bufferFactory()
-                            .wrap(body.getBytes()))
-            );
-        };
+    public SecurityConfig(@Lazy CustomAuthenticationConverter customAuthenticationConverter,
+                          @Lazy CustomReactiveAuthenticationManager customReactiveAuthenticationManager,
+                          CustomSecurityContextRepository customSecurityContextRepository) {
+        this.customAuthenticationConverter = customAuthenticationConverter;
+        this.customReactiveAuthenticationManager = customReactiveAuthenticationManager;
+        this.customSecurityContextRepository = customSecurityContextRepository;
     }
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable) // Disable CSRF for APIs
-                .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/user-mgmt-service/api/v1/admin/**").hasRole("ADMIN")
-                        .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyRole("USER", "ADMIN" )
-                        .pathMatchers(HttpMethod.GET, "/user-mgmt-service/api/v1/**").permitAll()
-                        .anyExchange().authenticated()
-                )
-                .httpBasic(httpBasic -> httpBasic
-                        .authenticationEntryPoint(customAuthenticationEntryPoint()));
-        return http.build();
+    public AuthenticationWebFilter authenticationWebFilter() {
+        AuthenticationWebFilter authFilter = new AuthenticationWebFilter(customReactiveAuthenticationManager);
+        authFilter.setServerAuthenticationConverter(customAuthenticationConverter);
+        authFilter.setSecurityContextRepository(customSecurityContextRepository);
+        return authFilter;
     }
 
     @Bean
-    public UserDetailsRepositoryReactiveAuthenticationManager authenticationManager(ReactiveUserDetailsService userDetailsService) {
-        return new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, AuthenticationWebFilter authenticationWebFilter) {
+        return
+                http
+                        .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                        .authorizeExchange(auth -> auth
+                                .pathMatchers("/user-mgmt-service/api/v1/auth/user/**").permitAll()
+                                .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                                .pathMatchers("/user-mgmt-service/api/v1/admin/**").hasAuthority("ADMIN")
+                                .anyExchange().authenticated())
+                        .addFilterAfter(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                        .build();
     }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
 
 }
