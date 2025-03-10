@@ -27,6 +27,7 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
         return userDetailsService.findByUsername(username).flatMap(userDetails -> {
+            System.out.printf("inp pwd : %s , encoded pwd : %s\n", password, userDetails.getPassword());
             if (passwordEncoder.matches(password, userDetails.getPassword())) {
                 return Mono.just((Authentication) new UsernamePasswordAuthenticationToken(username, password, userDetails.getAuthorities()));
             } else {
@@ -34,4 +35,6 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
             }
         }).switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found")));
     }
+
+
 }

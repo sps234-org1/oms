@@ -1,6 +1,7 @@
 package com.jocata.oms.service;
 
 import com.jocata.oms.UserDetailsDTO;
+import com.jocata.oms.response.RoleBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -28,19 +29,24 @@ public class CustomReactiveUserDetails implements ReactiveUserDetailsService {
                         .host("localhost")
                         .port(8081)
                         .path("/user-mgmt-service/api/v1/auth/user/get")
-                        .queryParam("userId", username )
+                        .queryParam("userId", username)
                         .build())
                 .retrieve()
                 .bodyToMono(UserDetailsDTO.class)
                 .map(this::convertToUserDetails)
-                .doOnSuccess(user -> System.out.println("User details loaded:" + user.getUsername()))
+                .doOnSuccess(user -> System.out.println("User details loaded:" + user.getPassword()))
                 .doOnError(error -> System.out.println("Error fetching user details:" + error.getMessage()));
     }
 
     private UserDetails convertToUserDetails(UserDetailsDTO dto) {
-        return User.withUsername(dto.getUserName())
-                .password(dto.getPassword())
-                .authorities(dto.getRoles().stream().map(role -> role).toArray(String[]::new))
+        return User.withUsername(dto.getUserId().toString())
+                .password(dto.getPasswordHash())
+                .roles(dto.getRoles().stream()
+                        .map(RoleBean::getRoleName)
+                        .toArray(String[]::new))
+                .authorities(dto.getRoles().stream()
+                        .map(role -> "ROLE_" + role.getRoleName())
+                        .toArray(String[]::new))
                 .build();
     }
 

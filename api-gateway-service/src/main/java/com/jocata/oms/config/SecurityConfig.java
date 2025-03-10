@@ -45,9 +45,11 @@ public class SecurityConfig {
                 http
                         .csrf(ServerHttpSecurity.CsrfSpec::disable)
                         .authorizeExchange(auth -> auth
-                                .pathMatchers("/user-mgmt-service/api/v1/auth/user/**").permitAll()
+                                .pathMatchers("/user-mgmt-service/api/v1/auth/user/**").hasAnyRole("USER", "ADMIN")
                                 .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                                .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyAuthority("USER", "ADMIN")
                                 .pathMatchers("/user-mgmt-service/api/v1/admin/**").hasAuthority("ADMIN")
+                                .pathMatchers("/user-mgmt-service/api/v1/public/**").permitAll()
                                 .anyExchange().authenticated())
                         .addFilterAfter(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .build();

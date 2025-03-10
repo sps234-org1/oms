@@ -16,8 +16,8 @@ public class LoginController {
     private UserService userService;
 
     @GetMapping("/user/get")
-    UserBean getUser(@RequestParam Integer userId) {
-        return userService.getUser(userId);
+    UserBean getUser(@RequestParam String userId) {
+        return userService.getUser( Integer.valueOf(userId));
     }
 
 }
