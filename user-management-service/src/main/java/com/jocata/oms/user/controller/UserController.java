@@ -20,10 +20,10 @@ public class UserController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping("/user/create")
+    @PostMapping("/public/create")
     UserBean createUser(@RequestBody GenericRequestPayload genericRequestPayload) {
         UserBean userBean = objectMapper.convertValue(genericRequestPayload.getData(), UserBean.class);
-        return userService.createUser( userBean );
+        return userService.createUser(userBean);
     }
 
     @GetMapping("/user/get")
@@ -33,17 +33,17 @@ public class UserController {
 
     @PutMapping("/user/update")
     UserBean updateUser(@RequestBody UserBean userBean) {
-        return userService.updateUser( userBean);
+        return userService.updateUser(userBean);
     }
 
     @DeleteMapping("/user/delete")
-    UserBean deleteUser(@RequestParam Integer userId, @RequestParam boolean hardDelete ) {
-        return userService.deleteUser(userId, hardDelete );
+    UserBean deleteUser(@RequestParam Integer userId, @RequestParam boolean hardDelete) {
+        return userService.deleteUser(userId, hardDelete);
     }
 
     @GetMapping("/user/getByEmail")
     UserBean getUserByEmail(@RequestParam String email) {
-        return userService.getUserByEmail( email );
+        return userService.getUserByEmail(email);
     }
 
     @GetMapping("/admin/getAll")
@@ -51,18 +51,14 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-
-    @PostMapping( "/admin/add/users/xls/upload" )
-    List<UserBean> addUsersUsingExcel( @RequestParam("file") MultipartFile file ) {
+    @PostMapping("/admin/add/users/xls/upload")
+    List<UserBean> addUsersUsingExcel(@RequestParam("file") MultipartFile file) {
         return userService.addUsersUsingExcel(file);
     }
 
-
-    @PostMapping( "/admin/add/users/pdf/upload" )
-    String addUsersUsingPdf( @RequestParam("file") MultipartFile file ) {
+    @PostMapping("/admin/add/users/pdf/upload")
+    String addUsersUsingPdf(@RequestParam("file") MultipartFile file) {
         return "";
     }
-
-
 
 }

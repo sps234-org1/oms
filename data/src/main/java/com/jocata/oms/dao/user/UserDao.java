@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Repository
-@Transactional
 public interface UserDao extends JpaRepository<UserDetails, Integer> {
 
     @Query( "SELECT u FROM UserDetails u WHERE u.email = ?1")
