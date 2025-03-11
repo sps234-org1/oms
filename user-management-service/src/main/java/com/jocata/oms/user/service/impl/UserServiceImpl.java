@@ -1,17 +1,17 @@
-package com.jocata.oms.service.impl;
+package com.jocata.oms.user.service.impl;
 
 import com.jocata.oms.bean.AddressBean;
 import com.jocata.oms.bean.PermissionBean;
 import com.jocata.oms.bean.RoleBean;
 import com.jocata.oms.bean.UserBean;
-import com.jocata.oms.dao.PermissionDao;
-import com.jocata.oms.dao.RoleDao;
-import com.jocata.oms.dao.UserDao;
-import com.jocata.oms.entity.AddressDetails;
-import com.jocata.oms.entity.PermissionDetails;
-import com.jocata.oms.entity.RoleDetails;
-import com.jocata.oms.entity.UserDetails;
-import com.jocata.oms.service.UserService;
+import com.jocata.oms.dao.user.PermissionDao;
+import com.jocata.oms.dao.user.RoleDao;
+import com.jocata.oms.dao.user.UserDao;
+import com.jocata.oms.entity.user.AddressDetails;
+import com.jocata.oms.entity.user.PermissionDetails;
+import com.jocata.oms.entity.user.RoleDetails;
+import com.jocata.oms.entity.user.UserDetails;
+import com.jocata.oms.user.service.UserService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;

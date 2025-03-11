@@ -1,10 +1,8 @@
-package com.jocata.oms.dao;
+package com.jocata.oms.dao.user;
 
-import com.jocata.oms.entity.UserDetails;
+import com.jocata.oms.entity.user.UserDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface UserDao extends JpaRepository<UserDetails, Integer> {
 

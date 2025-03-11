@@ -1,13 +1,5 @@
 package com.jocata.oms.service;
 
-import com.jocata.oms.response.UserBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
 //@Service
 //public class CustomUserDetailsService implements ReactiveUserDetailsService {
 //

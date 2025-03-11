@@ -1,5 +1,6 @@
 package com.jocata.oms.product.service.impl;
 
+import com.jocata.oms.bean.InventoryBean;
 import com.jocata.oms.bean.ProductBean;
 import com.jocata.oms.dao.product.ProductDao;
 import com.jocata.oms.entity.product.ProductDetails;
@@ -11,12 +12,17 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductDao productDao;
+
+    @Autowired
+    ExternalService externalService;
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
@@ -25,8 +31,16 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetails productDetails = convertToEntity(productBean);
         productDetails.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+
         ProductDetails savedProduct = productDao.save(productDetails);
-        return convertToBean(savedProduct);
+        InventoryBean inventoryReq = productBean.getInventoryInfo();
+        inventoryReq.setProductId(savedProduct.getProductId());
+
+        ProductBean res = convertToBean(savedProduct);
+        InventoryBean resInventory = externalService.saveInventoryInfo(inventoryReq).block();
+        logger.info("Inventory saved {} {} :", resInventory.getInventoryId(), resInventory.getStockQuantity());
+        res.setInventoryInfo(resInventory);
+        return res;
     }
 
     @Override
@@ -41,10 +55,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductBean> getAllProducts() {
+
+        List<ProductDetails> productDetailsList = productDao.findAll();
+        List<ProductBean> productBeanList = new ArrayList<>();
+        for (ProductDetails productDetails : productDetailsList) {
+            productBeanList.add(convertToBean(productDetails));
+        }
+        return productBeanList;
+    }
+
+    @Override
     public ProductBean updateProduct(ProductBean productBean) {
 
         ProductDetails productDetailsDB = productDao.findById(productBean.getProductId()).orElse(null);
-        if ( productDetailsDB == null) {
+        if (productDetailsDB == null) {
             logger.info("Product could not be updated as it does not exist for id: " + productBean.getProductId());
             return null;
         }

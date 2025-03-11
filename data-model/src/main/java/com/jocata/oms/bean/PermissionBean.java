@@ -1,9 +1,5 @@
 package com.jocata.oms.bean;
 
-import com.jocata.oms.entity.RolePermissionDetails;
-
-import java.util.List;
-
 public class PermissionBean {
 
     private Integer permissionId;

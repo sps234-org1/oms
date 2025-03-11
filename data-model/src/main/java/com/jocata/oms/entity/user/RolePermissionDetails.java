@@ -1,4 +1,4 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.entity.user;
 
 import jakarta.persistence.*;
 

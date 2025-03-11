@@ -1,6 +1,6 @@
-package com.jocata.oms.dao;
+package com.jocata.oms.dao.user;
 
-import com.jocata.oms.entity.PermissionDetails;
+import com.jocata.oms.entity.user.PermissionDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

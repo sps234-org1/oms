@@ -1,9 +1,8 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.entity.user;
 
 
 import jakarta.persistence.*;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 @Entity

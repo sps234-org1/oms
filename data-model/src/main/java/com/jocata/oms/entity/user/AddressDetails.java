@@ -1,4 +1,4 @@
-package com.jocata.oms.entity;
+package com.jocata.oms.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

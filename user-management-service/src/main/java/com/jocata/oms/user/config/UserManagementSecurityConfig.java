@@ -1,4 +1,4 @@
-package com.jocata.oms.config;
+package com.jocata.oms.user.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.jocata.oms;
+package com.jocata.oms.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

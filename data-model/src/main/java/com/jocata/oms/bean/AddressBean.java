@@ -1,9 +1,5 @@
 package com.jocata.oms.bean;
 
-import com.jocata.oms.entity.UserDetails;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-
 import java.util.Date;
 
 public class AddressBean {

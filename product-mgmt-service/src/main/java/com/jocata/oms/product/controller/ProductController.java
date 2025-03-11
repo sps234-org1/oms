@@ -5,6 +5,8 @@ import com.jocata.oms.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/product")
 public class ProductController {
@@ -20,6 +22,11 @@ public class ProductController {
     @GetMapping("/get/{productId}")
     ProductBean getProductById(@PathVariable Integer productId) {
         return productService.getProductById(productId);
+    }
+
+    @GetMapping("/get")
+    List<ProductBean> getAllProducts() {
+        return productService.getAllProducts();
     }
 
     @PutMapping("/update")

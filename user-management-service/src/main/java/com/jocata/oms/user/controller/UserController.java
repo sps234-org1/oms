@@ -1,9 +1,9 @@
-package com.jocata.oms.controller;
+package com.jocata.oms.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.request.GenericRequestPayload;
-import com.jocata.oms.service.UserService;
+import com.jocata.oms.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,4 +1,4 @@
-package com.jocata.oms.service;
+package com.jocata.oms.user.service;
 
 import com.jocata.oms.bean.UserBean;
 import org.springframework.web.multipart.MultipartFile;

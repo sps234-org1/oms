@@ -6,7 +6,6 @@ import com.jocata.oms.service.CustomSecurityContextRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -45,11 +44,11 @@ public class SecurityConfig {
                 http
                         .csrf(ServerHttpSecurity.CsrfSpec::disable)
                         .authorizeExchange(auth -> auth
+                                .pathMatchers("/user-mgmt-service/api/v1/public/**").permitAll()
                                 .pathMatchers("/user-mgmt-service/api/v1/auth/user/**").hasAnyRole("USER", "ADMIN")
                                 .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                 .pathMatchers("/user-mgmt-service/api/v1/user/**").hasAnyAuthority("USER", "ADMIN")
                                 .pathMatchers("/user-mgmt-service/api/v1/admin/**").hasAuthority("ADMIN")
-                                .pathMatchers("/user-mgmt-service/api/v1/public/**").permitAll()
                                 .anyExchange().authenticated())
                         .addFilterAfter(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .build();

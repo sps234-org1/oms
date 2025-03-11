@@ -23,6 +23,10 @@
         <module>data</module>
         <module>user-management-service</module>
         <module>common</module>
+        <module>order-mgmt-service</module>
+        <module>product-mgmt-service</module>
+        <module>payment-mgmt-service</module>
+        <module>inventory-mgmt-service</module>
     </modules>
 
     <properties>
