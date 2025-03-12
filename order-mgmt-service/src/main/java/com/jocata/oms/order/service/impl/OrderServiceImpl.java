@@ -1,9 +1,6 @@
 package com.jocata.oms.order.service.impl;
 
-import com.jocata.oms.bean.InventoryBean;
-import com.jocata.oms.bean.OrderBean;
-import com.jocata.oms.bean.OrderItemBean;
-import com.jocata.oms.bean.ProductBean;
+import com.jocata.oms.bean.*;
 import com.jocata.oms.dao.order.OrderDao;
 import com.jocata.oms.entity.order.OrderDetails;
 import com.jocata.oms.entity.order.OrderItemDetails;
@@ -31,9 +28,11 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-
     @Override
     public OrderBean saveOrder(OrderBean orderBean) {
+
+        List<InventoryBean> inventoryBeanList = externalService.getInventory().block();
+        logger.info("Inventory List: {}", inventoryBeanList.size());
 
         orderBean.setOrderStatus(OrderStatus.PENDING);
         orderBean.setOrderDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
@@ -42,11 +41,30 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderItemBean> orderItems = orderBean.getOrderItems();
 
-        List<InventoryBean> inventoryBeanList = externalService.getInventory().block();
-        logger.info("Inventory List: {}", inventoryBeanList.size());
+
+        double totalAmount = 0.0;
+
+
+
+        OrderDetails orderDetailsDB = orderDao.save(convertToEntity(orderBean));
+        return convertToBean(orderDetailsDB);
+    }
+
+    private OrderBean processOrder( OrderBean orderBean ) {
 
         List<ProductBean> productBeanList = externalService.getProducts().block();
         logger.info("Product List: {}", productBeanList.size());
+
+        List<InventoryBean> inventoryBeanList = externalService.getInventory().block();
+        logger.info("Inventory List: {}", inventoryBeanList.size());
+
+        orderBean.setOrderStatus(OrderStatus.PENDING);
+        orderBean.setOrderDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+        orderBean.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+        orderBean.setPaid(false);
+
+        List<OrderItemBean> orderItems = orderBean.getOrderItems();
+
 
         double totalAmount = 0.0;
 
@@ -69,6 +87,40 @@ public class OrderServiceImpl implements OrderService {
         return convertToBean(orderDetailsDB);
     }
 
+    @Override
+    public OrderBean getOrder(Integer orderId) {
+
+        OrderDetails orderDetails = orderDao.findById(orderId).orElse(null);
+        if (orderDetails == null) {
+            return null;
+        }
+        UserBean userDB = externalService.getUser(orderDetails.getCustomerId()).block();
+        logger.info("User details fetched");
+
+        if (userDB == null) {
+            return null;
+        }
+
+        List<ProductBean> products = externalService.getProducts().block();
+        logger.info("Product fetched");
+
+        if (products == null || products.isEmpty()) {
+            return null;
+        }
+
+        OrderBean response = convertToBean(orderDetails);
+        response.setCustomerDetails(userDB);
+
+        for (OrderItemBean orderItem : response.getOrderItems()) {
+            for (ProductBean product : products) {
+                if (orderItem.getProductId().equals(product.getProductId())) {
+                    orderItem.setProduct(product);
+                }
+            }
+        }
+        return response;
+    }
+
     private OrderDetails convertToEntity(OrderBean orderBean) {
 
         OrderDetails orderDetails = new OrderDetails();
@@ -79,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
         orderDetails.setPaid(orderBean.getPaid());
         orderDetails.setCreatedAt(orderBean.getCreatedAt());
         orderDetails.setUpdatedAt(orderBean.getUpdatedAt());
-        orderDetails.setOrderItems(convertToOrderDetails( orderDetails, orderBean.getOrderItems()));
+        orderDetails.setOrderItems(convertToOrderDetails(orderDetails, orderBean.getOrderItems()));
         return orderDetails;
     }
 
@@ -115,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
         return orderItemBeanList;
     }
 
-    private List<OrderItemDetails> convertToOrderDetails( OrderDetails order, List<OrderItemBean> orderItemBeans) {
+    private List<OrderItemDetails> convertToOrderDetails(OrderDetails order, List<OrderItemBean> orderItemBeans) {
 
         List<OrderItemDetails> orderItemDetailsList = new ArrayList<>();
         for (OrderItemBean orderItemBean : orderItemBeans) {
