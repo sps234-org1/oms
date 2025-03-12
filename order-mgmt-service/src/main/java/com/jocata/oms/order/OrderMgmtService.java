@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EntityScan( basePackages = "com.jocata.oms.entity.order" )
 @EnableJpaRepositories( basePackages = "com.jocata.oms.dao.order" )
+
 public class OrderMgmtService {
     public static void main(String[] args) {
         SpringApplication.run(OrderMgmtService.class, args);

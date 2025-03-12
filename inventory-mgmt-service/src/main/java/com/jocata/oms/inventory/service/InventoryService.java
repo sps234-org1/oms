@@ -11,10 +11,10 @@ public interface InventoryService {
 
     InventoryBean saveInventory(InventoryBean inventoryBean);
 
-    List<InventoryBean> reserveInventory(Integer productId, Integer quantity );
+    List<InventoryBean> reserveInventory( List<InventoryBean> inventoryRequests );
 
-    List<InventoryBean> releaseInventory(Integer productId, Integer quantity );
+    List<InventoryBean> releaseInventory( List<InventoryBean> inventoryRequests );
 
-    List<InventoryBean> updateInventory(Integer productId, Integer quantity );
+    List<InventoryBean> updateInventory( List<InventoryBean> inventoryRequests );
 
 }

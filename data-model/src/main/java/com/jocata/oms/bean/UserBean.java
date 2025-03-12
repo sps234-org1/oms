@@ -33,7 +33,6 @@ public class UserBean {
 
     private List<RoleBean> roles;
 
-
     public Integer getUserId() {
         return userId;
     }

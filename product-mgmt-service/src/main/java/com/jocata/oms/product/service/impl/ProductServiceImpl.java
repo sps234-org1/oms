@@ -8,6 +8,7 @@ import com.jocata.oms.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -44,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "#productId")
     public ProductBean getProductById(Integer productId) {
 
         ProductDetails productDetailsDB = productDao.findById(productId).orElse(null);

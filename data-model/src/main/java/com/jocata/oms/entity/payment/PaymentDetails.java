@@ -22,7 +22,6 @@ public class PaymentDetails {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
-
     private String transactionId;
     private BigDecimal amount;
     private Timestamp createdAt;

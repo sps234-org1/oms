@@ -2,6 +2,7 @@ package com.jocata.oms.bean;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 public class OrderItemBean {
 
@@ -13,6 +14,7 @@ public class OrderItemBean {
     private BigDecimal subTotal;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private ProductBean product;
 
     public Integer getOrderItemId() {
         return orderItemId;
@@ -76,5 +78,13 @@ public class OrderItemBean {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public ProductBean getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductBean product) {
+        this.product = product;
     }
 }

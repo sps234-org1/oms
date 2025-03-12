@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class OrderBean {
+public class OrderResponseBean {
 
     private Integer orderId;
     private Integer customerId;

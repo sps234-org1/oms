@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -23,10 +25,10 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentBean createPayment(PaymentBean paymentBean) {
 
         PaymentDetails paymentDetails = convertToEntity(paymentBean);
-        paymentDetails.setPaymentDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        paymentDetails.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        paymentDetails.setPaymentStatus(PaymentStatus.PENDING);
-
+        paymentDetails.setPaymentDate(Timestamp.valueOf(LocalDateTime.now()));
+        paymentDetails.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        paymentDetails.setTransactionId(UUID.randomUUID().toString());
+        paymentDetails.setPaymentStatus(PaymentStatus.COMPLETED);
         PaymentDetails paymentDetailsDB = paymentDao.save(paymentDetails);
         return convertToBean(paymentDetailsDB);
     }
@@ -44,10 +46,15 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentDetails convertToEntity(PaymentBean paymentBean) {
 
         PaymentDetails paymentDetails = new PaymentDetails();
+        paymentDetails.setPaymentId(paymentBean.getPaymentId());
         paymentDetails.setOrderId(paymentBean.getOrderId());
+        paymentDetails.setPaymentDate(paymentBean.getPaymentDate());
+        paymentDetails.setPaymentMethod(paymentBean.getPaymentMethod());
+        paymentDetails.setPaymentStatus(paymentBean.getPaymentStatus());
         paymentDetails.setTransactionId(paymentBean.getTransactionId());
         paymentDetails.setAmount(paymentBean.getAmount());
-        paymentDetails.setPaymentMethod( paymentBean.getPaymentMethod() );
+        paymentDetails.setCreatedAt(paymentBean.getCreatedAt());
+        paymentDetails.setUpdatedAt(paymentBean.getUpdatedAt());
         return paymentDetails;
     }
 
@@ -61,10 +68,9 @@ public class PaymentServiceImpl implements PaymentService {
         paymentBean.setAmount(paymentDetails.getAmount());
         paymentBean.setCreatedAt(paymentDetails.getCreatedAt());
         paymentBean.setUpdatedAt(paymentDetails.getUpdatedAt());
-        paymentBean.setPaymentMethod( paymentDetails.getPaymentMethod() );
-        paymentBean.setPaymentStatus( paymentDetails.getPaymentStatus() );
-
+        paymentBean.setPaymentMethod(paymentDetails.getPaymentMethod());
+        paymentBean.setPaymentStatus(paymentDetails.getPaymentStatus());
         return paymentBean;
-
     }
+
 }

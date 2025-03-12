@@ -15,31 +15,29 @@ public class InventoryController {
     InventoryService inventoryService;
 
     @PostMapping("/save")
-    InventoryBean saveInventory(@RequestBody InventoryBean inventoryBean){
+    InventoryBean saveInventory(@RequestBody InventoryBean inventoryBean) {
         return inventoryService.saveInventory(inventoryBean);
     }
 
     @GetMapping("/get")
-    List<InventoryBean> getAll( ){
+    List<InventoryBean> getAll() {
         return inventoryService.getAll();
     }
 
-    @PatchMapping( "/reserve/{productId}/{quantity}")
-    List<InventoryBean> reserveInventory(@PathVariable Integer productId,@PathVariable Integer quantity ) {
-        return inventoryService.reserveInventory( productId, quantity );
+    @PatchMapping("/reserve")
+    List<InventoryBean> reserveInventory(@RequestBody List<InventoryBean> inventoryRequests) {
+        return inventoryService.reserveInventory(inventoryRequests);
     }
 
-    @PatchMapping( "/release/{productId}/{quantity}")
-    List<InventoryBean> releaseInventory(@PathVariable Integer productId,@PathVariable Integer quantity) {
-        return inventoryService.releaseInventory( productId, quantity );
+    @PatchMapping("/release")
+    List<InventoryBean> releaseInventory(@RequestBody List<InventoryBean> inventoryRequests) {
+        return inventoryService.releaseInventory(inventoryRequests);
     }
 
-    @PatchMapping( "/update/{productId}/{quantity}")
-    List<InventoryBean> updateInventory(@PathVariable Integer productId,@PathVariable Integer quantity ){
-        return inventoryService.updateInventory( productId, quantity );
+    @PatchMapping("/update")
+    List<InventoryBean> updateInventory( @RequestBody List<InventoryBean> inventoryRequests) {
+        return inventoryService.updateInventory( inventoryRequests );
     }
-
-
 
 
 }

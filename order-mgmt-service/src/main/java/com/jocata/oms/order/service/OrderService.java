@@ -4,6 +4,8 @@ import com.jocata.oms.bean.OrderBean;
 
 public interface OrderService {
 
-    OrderBean saveOrder( OrderBean orderBean );
+    OrderBean saveOrder(OrderBean orderBean );
+
+    OrderBean getOrder(Integer orderId );
 
 }

@@ -1,5 +1,6 @@
 package com.jocata.oms.order.service.impl;
 
+
 import com.jocata.oms.bean.*;
 import com.jocata.oms.dao.order.OrderDao;
 import com.jocata.oms.entity.order.OrderDetails;
@@ -11,14 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
 
     @Autowired
     private ExternalService externalService;
@@ -32,58 +33,14 @@ public class OrderServiceImpl implements OrderService {
     public OrderBean saveOrder(OrderBean orderBean) {
 
         List<InventoryBean> inventoryBeanList = externalService.getInventory().block();
-        logger.info("Inventory List: {}", inventoryBeanList.size());
+        logger.info("Inventory fetched.");
 
-        orderBean.setOrderStatus(OrderStatus.PENDING);
-        orderBean.setOrderDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        orderBean.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        orderBean.setPaid(false);
-
-        List<OrderItemBean> orderItems = orderBean.getOrderItems();
-
-
-        double totalAmount = 0.0;
-
-
-
-        OrderDetails orderDetailsDB = orderDao.save(convertToEntity(orderBean));
-        return convertToBean(orderDetailsDB);
-    }
-
-    private OrderBean processOrder( OrderBean orderBean ) {
-
-        List<ProductBean> productBeanList = externalService.getProducts().block();
-        logger.info("Product List: {}", productBeanList.size());
-
-        List<InventoryBean> inventoryBeanList = externalService.getInventory().block();
-        logger.info("Inventory List: {}", inventoryBeanList.size());
-
-        orderBean.setOrderStatus(OrderStatus.PENDING);
-        orderBean.setOrderDate(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        orderBean.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-        orderBean.setPaid(false);
-
-        List<OrderItemBean> orderItems = orderBean.getOrderItems();
-
-
-        double totalAmount = 0.0;
-
-        for (OrderItemBean orderItem : orderItems) {
-            for (ProductBean productBean : productBeanList) {
-                if (orderItem.getProductId().equals(productBean.getProductId())) {
-                    double subTotal = productBean.getPrice().multiply(new BigDecimal(orderItem.getQuantity())).doubleValue();
-                    orderItem.setPrice(productBean.getPrice());
-                    orderItem.setSubTotal(new BigDecimal(subTotal));
-                    orderItem.setCreatedAt(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-                    totalAmount += subTotal;
-                    break;
-                }
-            }
-        }
-        orderBean.setTotalAmount(new BigDecimal(totalAmount));
-        orderBean.setOrderItems(orderItems);
-
-        OrderDetails orderDetailsDB = orderDao.save(convertToEntity(orderBean));
+        OrderDetails orderDetails = convertToEntity(orderBean);
+        orderDetails.setOrderStatus(OrderStatus.PENDING);
+        orderDetails.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
+        orderDetails.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        orderDetails.setPaid(false);
+        OrderDetails orderDetailsDB = orderDao.save(orderDetails);
         return convertToBean(orderDetailsDB);
     }
 
@@ -102,10 +59,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<ProductBean> products = externalService.getProducts().block();
-        logger.info("Product fetched");
+        logger.info("Product response : {}", products.size());
 
         if (products == null || products.isEmpty()) {
-            return null;
+            logger.error("No products found");
         }
 
         OrderBean response = convertToBean(orderDetails);
@@ -116,8 +73,13 @@ public class OrderServiceImpl implements OrderService {
                 if (orderItem.getProductId().equals(product.getProductId())) {
                     orderItem.setProduct(product);
                 }
+                if (product.getProductId() == -1) {
+                    logger.error("Product service is down");
+                    orderItem.setProduct(product);
+                }
             }
         }
+        response.setOrderItems(response.getOrderItems());
         return response;
     }
 
@@ -183,5 +145,4 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderItemDetailsList;
     }
-
 }
