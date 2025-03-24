@@ -24,6 +24,11 @@ public class ProductController {
         return productService.getProductById(productId);
     }
 
+    @PostMapping("/getByIds")
+    List<ProductBean> getProductsByIds( @RequestBody List<ProductBean> productBeans) {
+        return productService.getProductsByIds(productBeans);
+    }
+
     @GetMapping("/get")
     List<ProductBean> getAllProducts() {
         return productService.getAllProducts();

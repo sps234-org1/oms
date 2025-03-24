@@ -4,6 +4,7 @@ import com.jocata.oms.bean.InventoryBean;
 import com.jocata.oms.bean.ProductBean;
 import com.jocata.oms.dao.product.ProductDao;
 import com.jocata.oms.entity.product.ProductDetails;
+import com.jocata.apis.inventory.InventoryApiClient;
 import com.jocata.oms.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
     private ProductDao productDao;
 
     @Autowired
-    ExternalService externalService;
+    InventoryApiClient inventoryApiClient;
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
@@ -38,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         inventoryReq.setProductId(savedProduct.getProductId());
 
         ProductBean res = convertToBean(savedProduct);
-        InventoryBean resInventory = externalService.saveInventoryInfo(inventoryReq).block();
+        InventoryBean resInventory = inventoryApiClient.saveInventoryInfo(inventoryReq).block();
         logger.info("Inventory saved {} {} :", resInventory.getInventoryId(), resInventory.getStockQuantity());
         res.setInventoryInfo(resInventory);
         return res;
@@ -60,6 +61,21 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductBean> getAllProducts() {
 
         List<ProductDetails> productDetailsList = productDao.findAll();
+        List<ProductBean> productBeanList = new ArrayList<>();
+        for (ProductDetails productDetails : productDetailsList) {
+            productBeanList.add(convertToBean(productDetails));
+        }
+        return productBeanList;
+    }
+
+    public List<ProductBean> getProductsByIds( List<ProductBean> productBeans) {
+
+        List<Integer> productIds = new ArrayList<>();
+        for (ProductBean productBean : productBeans) {
+            productIds.add(productBean.getProductId());
+            logger.info("Product Ids : {}", productBean.getProductId());
+        }
+        List<ProductDetails> productDetailsList = productDao.findAllById(productIds);
         List<ProductBean> productBeanList = new ArrayList<>();
         for (ProductDetails productDetails : productDetailsList) {
             productBeanList.add(convertToBean(productDetails));

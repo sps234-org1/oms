@@ -1,6 +1,6 @@
 package com.jocata.oms.order.controller;
 
-import com.jocata.oms.bean.OrderBean;
+import com.jocata.oms.bean.order.OrderBean;
 import com.jocata.oms.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,5 +23,9 @@ public class OrderController {
         return orderService.getOrder(orderId);
     }
 
+    @PutMapping("/process/{orderId}")
+    OrderBean processOrder(@PathVariable Integer orderId) {
+        return orderService.processOrder(orderId);
+    }
 
 }

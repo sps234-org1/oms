@@ -27,6 +27,7 @@
         <module>product-mgmt-service</module>
         <module>payment-mgmt-service</module>
         <module>inventory-mgmt-service</module>
+        <module>api-clients</module>
     </modules>
 
     <properties>
@@ -36,7 +37,9 @@
     </properties>
 
     <dependencyManagement>
+
         <dependencies>
+
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -44,7 +47,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
 
             <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
             <dependency>
@@ -66,6 +68,7 @@
             </dependency>
 
         </dependencies>
+
     </dependencyManagement>
 
     <build>
@@ -85,7 +88,5 @@
             </plugin>
         </plugins>
     </build>
-
-
 
 </project>

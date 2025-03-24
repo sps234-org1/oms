@@ -25,19 +25,23 @@ public class InventoryController {
     }
 
     @PatchMapping("/reserve")
-    List<InventoryBean> reserveInventory(@RequestBody List<InventoryBean> inventoryRequests) {
-        return inventoryService.reserveInventory(inventoryRequests);
+    List<InventoryBean> reserveInventory(@RequestBody List<InventoryBean> inventoryRequest) {
+        return inventoryService.reserveInventory(inventoryRequest);
     }
 
     @PatchMapping("/release")
-    List<InventoryBean> releaseInventory(@RequestBody List<InventoryBean> inventoryRequests) {
-        return inventoryService.releaseInventory(inventoryRequests);
+    List<InventoryBean> releaseInventory(@RequestBody List<InventoryBean> inventoryRequest) {
+        return inventoryService.releaseInventory(inventoryRequest);
     }
 
     @PatchMapping("/update")
-    List<InventoryBean> updateInventory( @RequestBody List<InventoryBean> inventoryRequests) {
-        return inventoryService.updateInventory( inventoryRequests );
+    List<InventoryBean> updateInventory(@RequestBody List<InventoryBean> inventoryRequests) {
+        return inventoryService.updateInventory(inventoryRequests);
     }
 
+    @PostMapping("/getByProductIds")
+    List<InventoryBean> getInventoryByProductIds(@RequestBody List<InventoryBean> inventoryRequests) {
+        return inventoryService.getInventoryByProductIds(inventoryRequests);
+    }
 
 }

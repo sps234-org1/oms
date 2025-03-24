@@ -1,8 +1,9 @@
-package com.jocata.oms.bean;
+package com.jocata.oms.bean.order;
+
+import com.jocata.oms.bean.ProductBean;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
 
 public class OrderItemBean {
 

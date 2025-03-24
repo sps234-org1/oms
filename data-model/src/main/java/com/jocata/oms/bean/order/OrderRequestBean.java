@@ -1,23 +1,28 @@
-package com.jocata.oms.bean;
+package com.jocata.oms.bean.order;
 
+import com.jocata.oms.bean.AddressBean;
+import com.jocata.oms.bean.ProductBean;
+import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.enums.OrderStatus;
+import com.jocata.oms.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
 
-public class OrderResponseBean {
+public class OrderRequestBean {
 
     private Integer orderId;
     private Integer customerId;
-    private OrderStatus orderStatus;
     private Timestamp orderDate;
+    private AddressBean shippingAddress;
+    private ProductBean products;
     private BigDecimal totalAmount;
+    private PaymentMethod paymentMethod;
+    private OrderStatus orderStatus;
     private Boolean isPaid;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private UserBean customerDetails;
-    private List<OrderItemBean> orderItems;
 
     public Integer getOrderId() {
         return orderId;
@@ -81,14 +86,6 @@ public class OrderResponseBean {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public List<OrderItemBean> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItemBean> orderItems) {
-        this.orderItems = orderItems;
     }
 
     public UserBean getCustomerDetails() {

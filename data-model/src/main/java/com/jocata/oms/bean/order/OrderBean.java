@@ -1,5 +1,6 @@
-package com.jocata.oms.bean;
+package com.jocata.oms.bean.order;
 
+import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.enums.OrderStatus;
 
 import java.math.BigDecimal;
@@ -13,11 +14,11 @@ public class OrderBean {
     private OrderStatus orderStatus;
     private Timestamp orderDate;
     private BigDecimal totalAmount;
-    private Boolean isPaid;
+    private Boolean paid;
+    private List<OrderItemBean> orderItems;
+    private UserBean customerDetails;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    private UserBean customerDetails;
-    private List<OrderItemBean> orderItems;
 
     public Integer getOrderId() {
         return orderId;
@@ -60,11 +61,11 @@ public class OrderBean {
     }
 
     public Boolean getPaid() {
-        return isPaid;
+        return paid;
     }
 
     public void setPaid(Boolean paid) {
-        isPaid = paid;
+        this.paid = paid;
     }
 
     public Timestamp getCreatedAt() {

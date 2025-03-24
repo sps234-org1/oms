@@ -14,6 +14,7 @@ public class OrderDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer orderId;
+    @Column(nullable = false)
     private Integer customerId;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

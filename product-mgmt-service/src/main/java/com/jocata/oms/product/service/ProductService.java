@@ -1,10 +1,11 @@
 package com.jocata.oms.product.service;
 
 import com.jocata.oms.bean.ProductBean;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-public interface ProductService  {
+public interface ProductService {
 
     ProductBean saveProduct(ProductBean productBean);
 
@@ -16,5 +17,6 @@ public interface ProductService  {
 
     String deleteProduct(Integer productId);
 
+    List<ProductBean> getProductsByIds(List<ProductBean> productBeans);
 
 }

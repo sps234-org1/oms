@@ -1,6 +1,7 @@
 package com.jocata.oms.entity.order;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -10,10 +11,13 @@ import java.sql.Timestamp;
 public class OrderItemDetails {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer orderItemId;
     private Integer productId;
+    @Column(nullable = false)
+    @Min(value = 1)
     private Integer quantity;
+    @Min(value = 0)
     private BigDecimal price;
     private BigDecimal subTotal;
     private Timestamp createdAt;
@@ -86,4 +90,5 @@ public class OrderItemDetails {
     public void setOrder(OrderDetails order) {
         this.order = order;
     }
+
 }

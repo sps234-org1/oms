@@ -1,4 +1,4 @@
-package com.jocata.oms.order.config;
+package com.jocata.apis.config;
 
 
 import org.springframework.context.annotation.Bean;
@@ -17,6 +17,5 @@ public class WebClientConfig {
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }
-
 
 }

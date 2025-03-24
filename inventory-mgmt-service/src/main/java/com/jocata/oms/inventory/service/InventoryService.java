@@ -17,4 +17,6 @@ public interface InventoryService {
 
     List<InventoryBean> updateInventory( List<InventoryBean> inventoryRequests );
 
+    List<InventoryBean> getInventoryByProductIds( List<InventoryBean> inventoryRequests );
+
 }
