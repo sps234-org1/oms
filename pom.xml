@@ -28,6 +28,7 @@
         <module>payment-mgmt-service</module>
         <module>inventory-mgmt-service</module>
         <module>api-clients</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>
