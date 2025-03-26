@@ -50,9 +50,9 @@
 
         <div th:each="item : ${order.orderItems}" class="product-container">
             <p><strong>Product Name:</strong> <span th:text="${item.product.name}"></span></p>
-            <p><strong>Price:</strong> $<span th:text="${item.product.price}"></span></p>
+            <p><strong>Price:</strong> ₹<span th:text="${item.product.price}"></span></p>
             <p><strong>Quantity:</strong> <span th:text="${item.quantity}"></span></p>
-            <p><strong>Subtotal:</strong> $<span th:text="${item.subTotal}"></span></p>
+            <p><strong>Subtotal:</strong> ₹<span >1578</span></p>
         </div>
 
         <p><strong>Delivery Status:</strong> <span th:text="${order.orderStatus}"></span></p>

@@ -2,6 +2,7 @@ package com.jocata.oms.bean.order;
 
 import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.enums.OrderStatus;
+import com.jocata.oms.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -13,6 +14,7 @@ public class OrderBean {
     private Integer customerId;
     private OrderStatus orderStatus;
     private Timestamp orderDate;
+    private PaymentMethod paymentMethod;
     private BigDecimal totalAmount;
     private Boolean paid;
     private List<OrderItemBean> orderItems;
@@ -99,4 +101,13 @@ public class OrderBean {
     public void setCustomerDetails(UserBean customerDetails) {
         this.customerDetails = customerDetails;
     }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
 }

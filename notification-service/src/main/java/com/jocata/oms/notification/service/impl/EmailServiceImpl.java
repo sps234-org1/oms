@@ -18,6 +18,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Service
@@ -53,7 +54,7 @@ public class EmailServiceImpl implements EmailService {
 
         logger.info("Received order event for order id: " + order.getCustomerDetails());
         context = new Context();
-        context.setVariable("deliveryDate", LocalDate.now().plusDays(3));
+        context.setVariable("deliveryDate", LocalDate.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         context.setVariable("order", order);
         logger.info("Context set successfully!");
         String path = "D:\\Jocata\\w\\w1\\y25\\m02\\o\\d25\\OrderMgmtSystem\\notification-service\\src\\main\\resources\\t1.pdf";

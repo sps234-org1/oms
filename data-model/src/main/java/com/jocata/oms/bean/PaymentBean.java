@@ -89,4 +89,5 @@ public class PaymentBean {
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 }

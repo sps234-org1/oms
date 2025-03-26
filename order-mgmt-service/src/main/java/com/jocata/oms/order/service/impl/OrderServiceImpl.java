@@ -2,17 +2,20 @@ package com.jocata.oms.order.service.impl;
 
 
 import com.jocata.apis.inventory.InventoryApiClient;
+import com.jocata.apis.payment.PaymentApiClient;
 import com.jocata.apis.product.ProductApiClient;
 import com.jocata.apis.user.UserApiClient;
 import com.jocata.oms.bean.InventoryBean;
+import com.jocata.oms.bean.PaymentBean;
 import com.jocata.oms.bean.ProductBean;
 import com.jocata.oms.bean.UserBean;
 import com.jocata.oms.bean.order.OrderBean;
 import com.jocata.oms.bean.order.OrderItemBean;
 import com.jocata.oms.dao.order.OrderDao;
 import com.jocata.oms.entity.order.OrderDetails;
-import com.jocata.oms.entity.order.OrderItemDetails;
 import com.jocata.oms.enums.OrderStatus;
+import com.jocata.oms.enums.PaymentStatus;
+import com.jocata.oms.order.publisher.InventoryEventPublisher;
 import com.jocata.oms.order.publisher.OrderEventPublisher;
 import com.jocata.oms.order.service.OrderItemService;
 import com.jocata.oms.order.service.OrderService;
@@ -26,12 +29,19 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
+    private InventoryEventPublisher inventoryEventPublisher;
+
+    @Autowired
     private OrderEventPublisher orderEventPublisher;
+
+    @Autowired
+    private PaymentApiClient paymentApiClient;
 
     @Autowired
     private InventoryApiClient inventoryApiClient;
@@ -53,24 +63,41 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderBean saveOrder(OrderBean orderBean) {
 
-//        List<InventoryBean> res = reserveInventory(orderBean.getOrderItems());
-//        logger.info("Inventory reserved : {} ", res.size());
+        reserveInventory(orderBean.getOrderItems());
 
         OrderDetails orderDetails = convertToEntity(orderBean);
         orderDetails.setOrderStatus(OrderStatus.PENDING);
-        orderDetails.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
         orderDetails.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         orderDetails.setPaid(false);
         OrderDetails orderDetailsDB = orderDao.save(orderDetails);
 
-//        OrderBean response = convertToBean(orderDetailsDB);
+        PaymentBean paymentRequest = new PaymentBean();
+        paymentRequest.setPaymentMethod(orderBean.getPaymentMethod());
+        paymentRequest.setOrderId(orderDetailsDB.getOrderId());
+        PaymentBean paymentResponse = paymentApiClient.createPayment(paymentRequest).block();
+
+        if (paymentResponse == null || !Objects.equals(paymentResponse.getOrderId(), orderDetailsDB.getOrderId())
+                || paymentResponse.getPaymentId() == -1 || paymentResponse.getPaymentStatus().equals(PaymentStatus.FAILED)) {
+            throw new IllegalArgumentException("Payment failed for order id : " + orderDetailsDB.getOrderId());
+        }
+        if (paymentResponse.getPaymentStatus().equals(PaymentStatus.COMPLETED)) {
+            orderDetailsDB.setPaid(true);
+            orderDetails.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
+            orderDetailsDB.setOrderStatus(OrderStatus.SHIPPED);
+            orderDetailsDB.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+            orderDetailsDB = orderDao.save(orderDetailsDB);
+            releaseInventory(orderBean.getOrderItems());
+        }
         OrderBean response = getOrder(orderDetailsDB.getOrderId());
-        orderEventPublisher.publishOrderEvent(response);
-        logger.info("Order event published for order id : {}", orderDetailsDB.getOrderId());
+        if (orderDetailsDB.getPaid()) {
+            updateInventory(orderBean.getOrderItems());
+            orderEventPublisher.publishOrderEvent(response);
+            logger.info("Order event published for order id : {}", orderDetailsDB.getOrderId());
+        }
         return response;
     }
 
-    private List<InventoryBean> reserveInventory(List<OrderItemBean> orderItems) {
+    private void reserveInventory(List<OrderItemBean> orderItems) {
 
         List<InventoryBean> inventoryRequests = new ArrayList<>();
         for (OrderItemBean orderItem : orderItems) {
@@ -79,71 +106,32 @@ public class OrderServiceImpl implements OrderService {
             inventoryRequest.setReservedStock(orderItem.getQuantity());
             inventoryRequests.add(inventoryRequest);
         }
-        return inventoryApiClient.reserveInventory(inventoryRequests).block();
+        inventoryEventPublisher.publishReserveInventoryEvent(inventoryRequests);
     }
 
-    public OrderBean processOrder(Integer orderId) {
+    private void releaseInventory(List<OrderItemBean> orderItems) {
 
-//        inventoryListDB = externalService.getInventory().block();
-//        if (inventoryListDB == null || inventoryListDB.isEmpty()) {
-//            logger.error("No inventory found");
-//        }
-//        logger.info("Inventory response : {}", inventoryListDB.size());
-//
-//        productsDB = externalService.getProducts().block();
-//        if (productsDB == null || productsDB.isEmpty()) {
-//            logger.error("No products found");
-//        }
-//        logger.info("Product response : {}", productsDB.size());
-//
-//        List<InventoryBean> inventoryRequests = new ArrayList<>();
-//        List<OrderItemBean> orderItems = orderRequest.getOrderItems();
-//
-//        for (OrderItemBean orderItem : orderRequest.getOrderItems()) {
-//            int productId = orderItem.getProductId();
-//            int requiredQuantity = orderItem.getQuantity();
-//            double subTotal = 0;
-//
-//            for (ProductBean product : productsDB) {
-//                if (product.getProductId() == productId) {
-//                    BigDecimal price = product.getPrice();
-//
-//                    for (InventoryBean inventory : inventoryListDB) {
-//                        if (inventory.getProductId() == productId) {
-//                            int availableStock = inventory.getStockQuantity();
-//                            int requiredStock = orderItem.getQuantity();
-//                            if (availableStock >= requiredStock) {
-//                                InventoryBean inventoryRequest = new InventoryBean();
-//                                inventoryRequest.setProductId(productId);
-//                                inventoryRequest.setReservedStock(requiredStock);
-//                                inventoryRequests.add(inventoryRequest);
-//                                subTotal += price.doubleValue() * requiredQuantity;
-//                                orderItem.setPrice(price);
-//                                orderItem.setSubTotal(BigDecimal.valueOf(subTotal));
-//                                orderItem.setQuantity(requiredQuantity);
-//                                orderItems.add(orderItem);
-//                            } else {
-//                                logger.error("Insufficient stock for product id : {}", productId);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        inventoryRes = reserveInventory(inventoryRequests);
-//        if (inventoryRes == null || inventoryRes.isEmpty()) {
-//            logger.error("Inventory reservation failed");
-//            return null;
-//        }
-//
-//        orderRequest.setOrderItems(orderItems);
-
-        return null;
+        List<InventoryBean> inventoryRequests = new ArrayList<>();
+        for (OrderItemBean orderItem : orderItems) {
+            InventoryBean inventoryRequest = new InventoryBean();
+            inventoryRequest.setProductId(orderItem.getProductId());
+            inventoryRequests.add(inventoryRequest);
+        }
+        inventoryEventPublisher.publishReleaseInventoryEvent(inventoryRequests);
     }
 
-    List<OrderItemDetails> processOrderItem(List<OrderItemBean> orderItemRequests) {
-        return null;
+    private void updateInventory(List<OrderItemBean> orderItems) {
+
+        List<InventoryBean> inventoryRequests = new ArrayList<>();
+        for (OrderItemBean orderItem : orderItems) {
+            InventoryBean inventoryRequest = new InventoryBean();
+            inventoryRequest.setProductId(orderItem.getProductId());
+            inventoryRequest.setStockQuantity(orderItem.getQuantity());
+            logger.info("Inventory quantity : {}", orderItem.getQuantity());
+            inventoryRequest.setLastUpdated(Timestamp.valueOf(LocalDateTime.now()));
+            inventoryRequests.add(inventoryRequest);
+        }
+        inventoryEventPublisher.publishUpdateInventoryEvent(inventoryRequests);
     }
 
     @Override
@@ -155,10 +143,11 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }
         OrderBean response = convertToBean(orderDetails);
-        return populateOrderItem(response);
+        return getOrderBeanResponse(response);
     }
 
     private Mono<FetchResult> fetchAsync(OrderBean orderBean) {
+
         Mono<UserBean> userMono = userApiClient.getUser(orderBean.getCustomerId());
         Mono<List<ProductBean>> productsMono = productApiClient.getProducts();
         Mono<List<InventoryBean>> inventoryMono = inventoryApiClient.getInventory();
@@ -174,17 +163,26 @@ public class OrderServiceImpl implements OrderService {
                 .doOnError(throwable -> logger.error("Error occurred while fetching data", throwable));
     }
 
-    private OrderBean populateOrderItem(OrderBean orderBean) {
-        FetchResult fetchResult = fetchAsync(orderBean).block();
+    private OrderBean getOrderBeanResponse(OrderBean orderBean) {
 
+        FetchResult fetchResult = fetchAsync(orderBean).block();
         if (fetchResult == null) {
             logger.error("Failed to fetch data");
             return orderBean;
         }
-
         List<InventoryBean> inventoryList = fetchResult.inventoryList;
+        if (inventoryList == null || inventoryList.isEmpty()) {
+            logger.error("No inventory found");
+        }
         List<ProductBean> products = fetchResult.products;
-        orderBean.setCustomerDetails(fetchResult.user);
+        if (products == null || products.isEmpty()) {
+            logger.error("No products found");
+        }
+        UserBean user = fetchResult.user;
+        if (user == null) {
+            logger.error("No user found");
+        }
+        orderBean.setCustomerDetails(user);
 
         for (OrderItemBean orderItem : orderBean.getOrderItems()) {
             Integer reqProductId = orderItem.getProductId();
@@ -246,6 +244,66 @@ public class OrderServiceImpl implements OrderService {
         orderBean.setUpdatedAt(orderDetails.getUpdatedAt());
         orderBean.setOrderItems(orderItemService.convertToOrderItemBean(orderDetails));
         return orderBean;
+    }
+
+    public OrderBean processOrder(Integer orderId) {
+
+//        inventoryListDB = externalService.getInventory().block();
+//        if (inventoryListDB == null || inventoryListDB.isEmpty()) {
+//            logger.error("No inventory found");
+//        }
+//        logger.info("Inventory response : {}", inventoryListDB.size());
+//
+//        productsDB = externalService.getProducts().block();
+//        if (productsDB == null || productsDB.isEmpty()) {
+//            logger.error("No products found");
+//        }
+//        logger.info("Product response : {}", productsDB.size());
+//
+//        List<InventoryBean> inventoryRequests = new ArrayList<>();
+//        List<OrderItemBean> orderItems = orderRequest.getOrderItems();
+//
+//        for (OrderItemBean orderItem : orderRequest.getOrderItems()) {
+//            int productId = orderItem.getProductId();
+//            int requiredQuantity = orderItem.getQuantity();
+//            double subTotal = 0;
+//
+//            for (ProductBean product : productsDB) {
+//                if (product.getProductId() == productId) {
+//                    BigDecimal price = product.getPrice();
+//
+//                    for (InventoryBean inventory : inventoryListDB) {
+//                        if (inventory.getProductId() == productId) {
+//                            int availableStock = inventory.getStockQuantity();
+//                            int requiredStock = orderItem.getQuantity();
+//                            if (availableStock >= requiredStock) {
+//                                InventoryBean inventoryRequest = new InventoryBean();
+//                                inventoryRequest.setProductId(productId);
+//                                inventoryRequest.setReservedStock(requiredStock);
+//                                inventoryRequests.add(inventoryRequest);
+//                                subTotal += price.doubleValue() * requiredQuantity;
+//                                orderItem.setPrice(price);
+//                                orderItem.setSubTotal(BigDecimal.valueOf(subTotal));
+//                                orderItem.setQuantity(requiredQuantity);
+//                                orderItems.add(orderItem);
+//                            } else {
+//                                logger.error("Insufficient stock for product id : {}", productId);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        inventoryRes = reserveInventory(inventoryRequests);
+//        if (inventoryRes == null || inventoryRes.isEmpty()) {
+//            logger.error("Inventory reservation failed");
+//            return null;
+//        }
+//
+//        orderRequest.setOrderItems(orderItems);
+
+        return null;
     }
 
 }

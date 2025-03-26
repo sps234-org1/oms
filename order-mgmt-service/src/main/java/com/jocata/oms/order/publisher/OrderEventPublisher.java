@@ -13,10 +13,6 @@ public class OrderEventPublisher {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-//    public void publishOrderEvent(String orderId) {
-//        kafkaTemplate.send("order-topic", orderId);
-//    }
-
     public void publishOrderEvent(OrderBean orderBean) {
         kafkaTemplate.send("order-topic", orderBean);
     }

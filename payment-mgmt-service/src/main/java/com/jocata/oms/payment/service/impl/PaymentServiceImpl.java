@@ -22,9 +22,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     PaymentDao paymentDao;
 
-    @Autowired
-    private OrderApiClient orderApiClient;
-
     @Override
     public PaymentBean createPayment(PaymentBean paymentBean) {
 
@@ -32,15 +29,13 @@ public class PaymentServiceImpl implements PaymentService {
         paymentDetails.setPaymentDate(Timestamp.valueOf(LocalDateTime.now()));
         paymentDetails.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         paymentDetails.setTransactionId(UUID.randomUUID().toString());
-        paymentDetails.setPaymentStatus(PaymentStatus.PENDING);
-
-        OrderBean processedOrderResponse = orderApiClient.processOrder(paymentBean.getOrderId()).block();
-        if (processedOrderResponse == null || processedOrderResponse.getOrderId() == -1) {
-            throw new IllegalArgumentException("Order processing failed for order id: " + paymentBean.getOrderId());
-        } else {
-            paymentDetails.setPaymentStatus(PaymentStatus.COMPLETED);
-        }
-
+        paymentDetails.setPaymentStatus(PaymentStatus.COMPLETED);
+//        OrderBean processedOrderResponse = orderApiClient.processOrder(paymentBean.getOrderId()).block();
+//        if (processedOrderResponse == null || processedOrderResponse.getOrderId() == -1) {
+//            throw new IllegalArgumentException("Order processing failed for order id: " + paymentBean.getOrderId());
+//        } else {
+//            paymentDetails.setPaymentStatus(PaymentStatus.COMPLETED);
+//        }
         PaymentDetails paymentDetailsDB = paymentDao.save(paymentDetails);
         return convertToBean(paymentDetailsDB);
     }
