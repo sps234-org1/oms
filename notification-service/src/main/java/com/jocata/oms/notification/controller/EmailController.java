@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/email")
 public class EmailController {
@@ -22,8 +25,9 @@ public class EmailController {
     @PostMapping("/send/attachment")
     Object sendEmailWithAttachment(
             @RequestParam("order") OrderBean order,
-            @RequestParam("file") MultipartFile file
-    ) {
+            @RequestParam("file") MultipartFile mfile
+    ) throws IOException {
+        File file = File.createTempFile("temp", mfile.getOriginalFilename());
         return emailService.sendEmailWithAttachment(order, file);
     }
 

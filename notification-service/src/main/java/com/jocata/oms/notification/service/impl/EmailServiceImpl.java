@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -53,12 +54,14 @@ public class EmailServiceImpl implements EmailService {
         logger.info("Received order event for order id: " + order.getCustomerDetails());
         context = new Context();
         context.setVariable("deliveryDate", LocalDate.now().plusDays(3));
-        context.setVariable("order", order );
+        context.setVariable("order", order);
         logger.info("Context set successfully!");
-        sendEmailWithAttachment(order, null);
+        String path = "D:\\Jocata\\w\\w1\\y25\\m02\\o\\d25\\OrderMgmtSystem\\notification-service\\src\\main\\resources\\t1.pdf";
+        File file = new File(path);
+        sendEmailWithAttachment(order, file);
     }
 
-    public Object sendEmailWithAttachment(OrderBean order, MultipartFile file) {
+    public Object sendEmailWithAttachment(OrderBean order, File file) {
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
@@ -73,8 +76,8 @@ public class EmailServiceImpl implements EmailService {
             }
             String emailBody = templateEngine.process("template1", context);
             helper.setText(emailBody, true);
-            if (file != null && !file.isEmpty()) {
-                helper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
+            if (file != null && file.exists()) {
+                helper.addAttachment(Objects.requireNonNull(file.getName()), file);
             }
             javaMailSender.send(mimeMessage);
             logger.info("Email sent successfully to {}", order.getCustomerDetails().getEmail());
@@ -83,6 +86,5 @@ public class EmailServiceImpl implements EmailService {
         }
         return "Email sent successfully!";
     }
-
 
 }
