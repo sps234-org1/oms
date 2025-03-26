@@ -1,0 +1,8 @@
+<emailData>
+    <customerName>User 1</customerName>
+    <orderId>1</orderId>
+    <productName>Product 1</productName>
+    <price>999</price>
+    <deliveryStatus>Shipped</deliveryStatus>
+    <deliveryDate>31-03-2025</deliveryDate>
+</emailData>

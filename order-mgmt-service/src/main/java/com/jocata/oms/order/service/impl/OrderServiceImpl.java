@@ -13,6 +13,7 @@ import com.jocata.oms.dao.order.OrderDao;
 import com.jocata.oms.entity.order.OrderDetails;
 import com.jocata.oms.entity.order.OrderItemDetails;
 import com.jocata.oms.enums.OrderStatus;
+import com.jocata.oms.order.publisher.OrderEventPublisher;
 import com.jocata.oms.order.service.OrderItemService;
 import com.jocata.oms.order.service.OrderService;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ import java.util.List;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    @Autowired
+    private OrderEventPublisher orderEventPublisher;
 
     @Autowired
     private InventoryApiClient inventoryApiClient;
@@ -49,8 +53,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderBean saveOrder(OrderBean orderBean) {
 
-        reserveInventory(orderBean.getOrderItems());
-        logger.info("Inventory reserved.");
+//        List<InventoryBean> res = reserveInventory(orderBean.getOrderItems());
+//        logger.info("Inventory reserved : {} ", res.size());
 
         OrderDetails orderDetails = convertToEntity(orderBean);
         orderDetails.setOrderStatus(OrderStatus.PENDING);
@@ -58,7 +62,12 @@ public class OrderServiceImpl implements OrderService {
         orderDetails.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         orderDetails.setPaid(false);
         OrderDetails orderDetailsDB = orderDao.save(orderDetails);
-        return convertToBean(orderDetailsDB);
+
+//        OrderBean response = convertToBean(orderDetailsDB);
+        OrderBean response = getOrder(orderDetailsDB.getOrderId());
+        orderEventPublisher.publishOrderEvent(response);
+        logger.info("Order event published for order id : {}", orderDetailsDB.getOrderId());
+        return response;
     }
 
     private List<InventoryBean> reserveInventory(List<OrderItemBean> orderItems) {

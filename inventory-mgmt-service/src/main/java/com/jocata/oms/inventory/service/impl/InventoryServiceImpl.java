@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryServiceImpl implements InventoryService {
@@ -33,21 +34,10 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<InventoryBean> getAll() {
-
-        List<InventoryDetails> inventoryDetailsDB = getAllInventory();
-        List<InventoryBean> inventoryBeans = new ArrayList<>();
-        for (InventoryDetails inventoryDetails : inventoryDetailsDB) {
-            InventoryBean inventoryBean = convertToBean(inventoryDetails);
-            inventoryBeans.add(inventoryBean);
-        }
-        return inventoryBeans;
+        return convertEntityListtoBeanList(inventoryDao.findAll());
     }
 
-    private List<InventoryDetails> getAllInventory() {
-        return inventoryDao.findAll();
-    }
-
-    private List<InventoryDetails> getAllInventoryById(List<InventoryBean> inventoryRequests) {
+    private List<InventoryDetails> findAllByProductId(List<InventoryBean> inventoryRequests) {
         List<Integer> productIds = new ArrayList<>();
         for (InventoryBean inventoryRequest : inventoryRequests) {
             productIds.add(inventoryRequest.getProductId());
@@ -55,10 +45,30 @@ public class InventoryServiceImpl implements InventoryService {
         return inventoryDao.findAllByProductId(productIds);
     }
 
+    public List<InventoryBean> getInventoryByProductIds(List<InventoryBean> inventoryRequests) {
+
+        List<Integer> productIds = new ArrayList<>();
+        for (InventoryBean inventoryRequest : inventoryRequests) {
+            productIds.add(inventoryRequest.getProductId());
+        }
+        List<InventoryDetails> inventoryDetailsListDB = inventoryDao.findAllByProductId(productIds);
+        return convertEntityListtoBeanList(inventoryDetailsListDB);
+    }
+
+    private List<InventoryBean> saveAll(List<InventoryDetails> inventoryDetailsList) {
+        List<InventoryDetails> inventoryDetailsListDB = inventoryDao.saveAll(inventoryDetailsList);
+        return convertEntityListtoBeanList(inventoryDetailsListDB);
+    }
+
+    @Override
+    public List<InventoryBean> updateInventory(List<InventoryBean> inventoryRequests) {
+        return saveAll(convertBeanListtoEntityList(inventoryRequests));
+    }
+
     @Override
     public List<InventoryBean> reserveInventory(List<InventoryBean> inventoryRequests) {
 
-        List<InventoryDetails> inventoryListDB = getAllInventoryById(inventoryRequests);
+        List<InventoryDetails> inventoryListDB = findAllByProductId(inventoryRequests);
 
         for (InventoryBean inventoryRequest : inventoryRequests) {
             Integer productIdReq = inventoryRequest.getProductId();
@@ -78,65 +88,57 @@ public class InventoryServiceImpl implements InventoryService {
 
             }
         }
-        return updateInventoryDB(inventoryListDB);
-    }
-
-    private List<InventoryBean> updateInventoryDB(List<InventoryDetails> inventoryDetailsList) {
-
-        List<InventoryDetails> inventoryDetailsListDB = inventoryDao.saveAll(inventoryDetailsList);
-        List<InventoryBean> resList = new ArrayList<>();
-        for (InventoryDetails inventoryDetails : inventoryDetailsListDB) {
-            resList.add(convertToBean(inventoryDetails));
-        }
-        return resList;
-    }
-
-    @Override
-    public List<InventoryBean> updateInventory(List<InventoryBean> inventoryRequests) {
-
-        List<InventoryDetails> inventoryDetailsList = new ArrayList<>();
-        for (InventoryBean inventoryRequest : inventoryRequests) {
-            inventoryDetailsList.add(convertToEntity(inventoryRequest));
-        }
-        return updateInventoryDB(inventoryDetailsList);
+        return saveAll(inventoryListDB);
     }
 
     @Override
     public List<InventoryBean> releaseInventory(List<InventoryBean> inventoryRequests) {
 
-        List<InventoryDetails> inventoryListDB = getAllInventory();
+        List<InventoryDetails> inventoryListDB = findAllByProductId(inventoryRequests);
+        List<InventoryDetails> resList = getDeepCopy(inventoryListDB);
         for (InventoryBean inventoryRequest : inventoryRequests) {
             Integer productIdReq = inventoryRequest.getProductId();
             for (InventoryDetails inventoryDB : inventoryListDB) {
                 Integer quantityDB = inventoryDB.getStockQuantity();
-                Integer stockDB = inventoryDB.getReservedStock();
+                Integer reservedStock = inventoryDB.getReservedStock();
                 if (inventoryDB.getProductId().equals(productIdReq)) {
-                    Integer stockReq = inventoryRequest.getReservedStock();
-                    if (stockDB >= stockReq) {
-                        inventoryDB.setReservedStock(stockDB - stockReq);
-                        inventoryDB.setStockQuantity(quantityDB + stockReq);
+                    if (reservedStock <= quantityDB) {
+                        inventoryDB.setReservedStock(0);
+                        inventoryDB.setStockQuantity(quantityDB + reservedStock);
                         inventoryDB.setLastUpdated(Timestamp.valueOf(LocalDateTime.now()));
                     } else {
-                        logger.info("Stock not available for product id: {}", inventoryRequest.getProductId());
+                        logger.info("Reserve stock more than quantity: {}", quantityDB - reservedStock);
                     }
                 }
             }
         }
-        List<InventoryDetails> inventoryDetailsList = inventoryDao.saveAll(inventoryListDB);
-        List<InventoryBean> resList = new ArrayList<>();
-        for (InventoryDetails inventoryDetails : inventoryDetailsList) {
-            resList.add(convertToBean(inventoryDetails));
+        saveAll(inventoryListDB);
+        return convertEntityListtoBeanList(resList);
+    }
+
+    private List<InventoryDetails> getDeepCopy(List<InventoryDetails> inventoryListDB) {
+
+        List<InventoryDetails> resList = inventoryListDB.stream().map(details -> {
+            InventoryDetails clonedDetails = new InventoryDetails();
+            clonedDetails.setInventoryId(details.getInventoryId());
+            clonedDetails.setProductId(details.getProductId());
+            clonedDetails.setStockQuantity(details.getStockQuantity());
+            clonedDetails.setReservedStock(details.getReservedStock());
+            clonedDetails.setLastUpdated(details.getLastUpdated());
+            return clonedDetails;
+        }).toList();
+        return resList;
+    }
+
+    private List<InventoryDetails> convertBeanListtoEntityList(List<InventoryBean> inventoryRequests) {
+        List<InventoryDetails> resList = new ArrayList<>();
+        for (InventoryBean inventoryBean : inventoryRequests) {
+            resList.add(convertToEntity(inventoryBean));
         }
         return resList;
     }
 
-    public List<InventoryBean> getInventoryByProductIds(List<InventoryBean> inventoryRequests) {
-
-        List<Integer> productIds = new ArrayList<>();
-        for (InventoryBean inventoryRequest : inventoryRequests) {
-            productIds.add(inventoryRequest.getProductId());
-        }
-        List<InventoryDetails> inventoryDetailsListDB = inventoryDao.findAllByProductId(productIds);
+    private List<InventoryBean> convertEntityListtoBeanList(List<InventoryDetails> inventoryDetailsListDB) {
         List<InventoryBean> resList = new ArrayList<>();
         for (InventoryDetails inventoryDetails : inventoryDetailsListDB) {
             resList.add(convertToBean(inventoryDetails));
@@ -165,6 +167,5 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryBean.setLastUpdated(inventoryDetails.getLastUpdated());
         return inventoryBean;
     }
-
 
 }

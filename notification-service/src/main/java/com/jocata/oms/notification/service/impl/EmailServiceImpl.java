@@ -1,21 +1,33 @@
 package com.jocata.oms.notification.service.impl;
 
+import com.jocata.oms.bean.order.OrderBean;
 import com.jocata.oms.notification.request.EmailRequest;
 import com.jocata.oms.notification.service.EmailService;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Service
 public class EmailServiceImpl implements EmailService {
+
+    Context context;
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Autowired
     JavaMailSender javaMailSender;
@@ -35,49 +47,42 @@ public class EmailServiceImpl implements EmailService {
         return "Email sent successfully!";
     }
 
-    public Object sendEmailWithAttachment(EmailRequest emailRequest) {
+    @KafkaListener(topics = "order-topic", groupId = "notification-group")
+    private void handleOrderEvent(OrderBean order) {
+
+        logger.info("Received order event for order id: " + order.getCustomerDetails());
+        context = new Context();
+        context.setVariable("deliveryDate", LocalDate.now().plusDays(3));
+        context.setVariable("order", order );
+        logger.info("Context set successfully!");
+        sendEmailWithAttachment(order, null);
+    }
+
+    public Object sendEmailWithAttachment(OrderBean order, MultipartFile file) {
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-
-            helper.setTo(emailRequest.getTo());
-            helper.setSubject(emailRequest.getSubject());
-
-            String templatePath = "D:\\Jocata\\w\\w1\\y25\\m02\\o\\d25\\OrderMgmtSystem\\notification-service\\src\\main\\resources\\template\\template1.html";
-            String htmlContent = readHtmlFile(templatePath);
-            if (htmlContent == null) {
-                helper.setText(emailRequest.getBody());
-            } else {
-                helper.setText(htmlContent, true);
+            helper.setTo(order.getCustomerDetails().getEmail());
+            helper.setSubject("Order Confirmation");
+            if (context == null) {
+                context = new Context();
+                context.setVariable("name", "Customer");
+                context.setVariable("orderId", "-1");
+                context.setVariable("orders", null);
             }
-
-            String absolutePath = "D:\\Jocata\\w\\w1\\y25\\m02\\o\\d25\\OrderMgmtSystem\\notification-service\\src\\main\\resources\\t1.pdf";
-            FileSystemResource file = new FileSystemResource(absolutePath);
-            helper.addAttachment("t1.pdf", file);
-
+            String emailBody = templateEngine.process("template1", context);
+            helper.setText(emailBody, true);
+            if (file != null && !file.isEmpty()) {
+                helper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
+            }
             javaMailSender.send(mimeMessage);
-
+            logger.info("Email sent successfully to {}", order.getCustomerDetails().getEmail());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to send email", e);
         }
-        return "Email with attachment sent successfully!";
+        return "Email sent successfully!";
     }
 
-    private String readHtmlFile(String path) {
-
-        try {
-            String htmlContent = new String(Files.readAllBytes(Paths.get(path)));
-            htmlContent = htmlContent.replace("{{name}}", "Vasu");
-            htmlContent = htmlContent.replace("{{orderId}}", "1");
-            htmlContent = htmlContent.replace("{{productName}}", "Product 1");
-            htmlContent = htmlContent.replace("{{price}}", "999");
-            htmlContent = htmlContent.replace("{{date}}", LocalDate.now().toString());
-            return htmlContent;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 }

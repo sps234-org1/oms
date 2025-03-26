@@ -1,7 +1,5 @@
 package com.jocata.oms.bean;
 
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
