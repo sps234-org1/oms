@@ -13,6 +13,7 @@ import com.jocata.oms.bean.order.OrderBean;
 import com.jocata.oms.bean.order.OrderItemBean;
 import com.jocata.oms.dao.order.OrderDao;
 import com.jocata.oms.entity.order.OrderDetails;
+import com.jocata.oms.entity.order.OrderItemDetails;
 import com.jocata.oms.enums.OrderStatus;
 import com.jocata.oms.enums.PaymentStatus;
 import com.jocata.oms.order.publisher.InventoryEventPublisher;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,6 +83,8 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Payment failed for order id : " + orderDetailsDB.getOrderId());
         }
         if (paymentResponse.getPaymentStatus().equals(PaymentStatus.COMPLETED)) {
+            BigDecimal total = getTotal(orderDetailsDB);
+            orderDetailsDB.setTotalAmount(total);
             orderDetailsDB.setPaid(true);
             orderDetails.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
             orderDetailsDB.setOrderStatus(OrderStatus.SHIPPED);
@@ -89,12 +93,45 @@ public class OrderServiceImpl implements OrderService {
             releaseInventory(orderBean.getOrderItems());
         }
         OrderBean response = getOrder(orderDetailsDB.getOrderId());
+        response.setPaymentMethod(paymentResponse.getPaymentMethod());
         if (orderDetailsDB.getPaid()) {
             updateInventory(orderBean.getOrderItems());
             orderEventPublisher.publishOrderEvent(response);
             logger.info("Order event published for order id : {}", orderDetailsDB.getOrderId());
         }
         return response;
+    }
+
+    private BigDecimal getTotal(OrderDetails orderDetails) {
+
+        BigDecimal total = BigDecimal.ZERO;
+        List<ProductBean> products = productApiClient.getProducts().block();
+        if (products == null || products.isEmpty()) {
+            throw new IllegalArgumentException("No products found");
+        }
+        List<OrderItemDetails> orderItems = orderDetails.getOrderItems();
+        for (OrderItemDetails orderItemDetail : orderItems) {
+            BigDecimal subTotal = BigDecimal.ZERO;
+            Integer requestForProductId = orderItemDetail.getProductId();
+            if (requestForProductId == null) {
+                logger.error("Product id not found");
+            }
+            Integer requestQuantity = orderItemDetail.getQuantity();
+            for (ProductBean product : products) {
+                Integer productIdDB = product.getProductId();
+                if (productIdDB.equals(requestForProductId)) {
+                    BigDecimal price = product.getPrice();
+                    subTotal = price.multiply(BigDecimal.valueOf(requestQuantity));
+                    orderItemDetail.setPrice(price);
+                    orderItemDetail.setSubTotal(subTotal);
+                    orderItemDetail.setQuantity(requestQuantity);
+                    break;
+                }
+            }
+            total = total.add(subTotal);
+        }
+        orderDetails.setOrderItems(orderItems);
+        return total;
     }
 
     private void reserveInventory(List<OrderItemBean> orderItems) {

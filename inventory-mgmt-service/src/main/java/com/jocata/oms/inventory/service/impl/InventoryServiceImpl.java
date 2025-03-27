@@ -93,7 +93,7 @@ public class InventoryServiceImpl implements InventoryService {
             Integer reqProductId = inventoryRequest.getProductId();
             for (InventoryDetails inventoryDB : inventoryListDB) {
                 if (inventoryDB.getProductId().equals(reqProductId)) {
-                    inventoryDB.setStockQuantity(inventoryDB.getStockQuantity() - inventoryRequest.getStockQuantity());
+                    inventoryDB.setStockQuantity(inventoryDB.getStockQuantity() + inventoryRequest.getStockQuantity());
                     inventoryDB.setLastUpdated(Timestamp.valueOf(LocalDateTime.now()));
                 }
             }

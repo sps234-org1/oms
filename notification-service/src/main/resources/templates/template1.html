@@ -52,10 +52,11 @@
             <p><strong>Product Name:</strong> <span th:text="${item.product.name}"></span></p>
             <p><strong>Price:</strong> ₹<span th:text="${item.product.price}"></span></p>
             <p><strong>Quantity:</strong> <span th:text="${item.quantity}"></span></p>
-            <p><strong>Subtotal:</strong> ₹<span >1578</span></p>
+            <p><strong>Subtotal:</strong> ₹<span th:text="${item.subTotal}"></span></p>
         </div>
 
         <p><strong>Delivery Status:</strong> <span th:text="${order.orderStatus}"></span></p>
+        <p><strong>Total Order Amount:</strong> <span th:text="${order.totalAmount}"></span></p>
         <p><strong>Estimated Delivery Date:</strong> <span th:text="${deliveryDate}"></span></p>
     </div>
 

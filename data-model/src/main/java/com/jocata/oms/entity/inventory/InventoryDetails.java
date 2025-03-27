@@ -2,6 +2,7 @@ package com.jocata.oms.entity.inventory;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Null;
 import org.springframework.lang.NonNull;
 
 import java.sql.Timestamp;
@@ -13,11 +14,16 @@ public class InventoryDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer inventoryId;
+
     @Column(nullable = false)
     private Integer productId;
-    @Min(0)
+
+//    @Null
+//    @Min(0)
     private Integer stockQuantity;
-    @Min(0)
+
+//    @Null
+//    @Min(0)
     private Integer reservedStock;
     private Timestamp lastUpdated;
 
